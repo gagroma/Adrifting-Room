@@ -1,0 +1,4 @@
+# Project-local generated artifacts
+/android/
+.qa/
+captures/
