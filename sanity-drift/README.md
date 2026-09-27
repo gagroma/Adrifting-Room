@@ -7,6 +7,10 @@ A compact physics puzzle based on the Drifting Thoughts design document. The pla
 1. Connect your headset and start an active OpenXR runtime: Meta Quest Link/Air Link, SteamVR, or Virtual Desktop.
 2. Double-click `play_sanity_drift.cmd`.
 
+For HTC Vive, keep SteamVR open and use `play_sanity_drift_vive.cmd`. This
+launcher explicitly selects the SteamVR OpenXR runtime so Meta XR Simulator
+cannot capture the session.
+
 When OpenXR is available, the game starts in the headset. The player remains in place with no artificial locomotion or camera rotation.
 
 Use `play_sanity_drift_desktop.cmd` to test without a headset.
@@ -16,15 +20,20 @@ Use `play_sanity_drift_desktop.cmd` to test without a headset.
 The title screen includes a `TUTORIAL` button for an interactive training room
 and a `VR CONTROLS` button with the complete in-game guide. In the tutorial, the
 same robot from the main dream waits for each action before explaining the next.
+Choose `NORMAL` or `HARD` before entering the dream. Hard mode replaces all
+three puzzles with new layouts containing three, four, and five plates, longer
+gravity sequences, more thoughts, and extra anchor decisions. It also shortens
+both the Drift planning phase and the gravity warning. The final screen lets
+you replay the campaign or return to the main menu.
 
 ### VR
 
 - right trigger — remote grab; release to throw
 - right trigger on the robot — give the guide a playful bump
 - right grip — push the highlighted thought
-- right thumbstick up/down — change grab distance
-- left trigger — anchor the highlighted thought until the next fall
-- left thumbstick click — end the Drift phase early
+- right thumbstick or Vive trackpad up/down — change grab distance
+- left trigger or grip — anchor the highlighted thought until the next fall
+- left thumbstick/Vive trackpad click or `X` — end the Drift phase early
 - left wrist display — timer, next gravity direction, plates, and anchors
 
 ### Mouse and keyboard
@@ -80,4 +89,4 @@ editor window.
 
 ## Supported VR modes
 
-The project uses Godot's built-in OpenXR support and targets PCVR headsets, including Quest through Link/Air Link, Steam Link, or Virtual Desktop. A standalone Quest `.apk` requires an Android export template, the Android SDK, and an export configuration for the target headset.
+The project uses Godot's built-in OpenXR support and targets PCVR headsets, including HTC Vive controllers through SteamVR and Quest through Link/Air Link, Steam Link, or Virtual Desktop. A standalone Quest `.apk` requires an Android export template, the Android SDK, and an export configuration for the target headset.

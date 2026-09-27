@@ -7,6 +7,8 @@ signal restart_requested
 signal calm_requested
 signal menu_start_requested
 signal menu_tutorial_requested
+signal menu_main_requested
+signal menu_difficulty_changed(hard: bool)
 signal menu_controls_requested
 signal guide_hit(source_position: Vector3)
 signal thought_grabbed(thought: ThoughtProp)
@@ -117,6 +119,21 @@ func show_vr_menu() -> void:
 		xr_pointer.visible = false
 
 
+func show_vr_finish_menu() -> void:
+	if is_instance_valid(vr_menu):
+		vr_menu.visible = true
+		vr_menu.show_finish_page()
+	if is_instance_valid(wrist_label):
+		wrist_label.visible = false
+	if is_instance_valid(xr_pointer):
+		xr_pointer.visible = false
+
+
+func set_menu_hard_mode(value: bool) -> void:
+	if is_instance_valid(vr_menu):
+		vr_menu.set_hard_mode(value)
+
+
 func hide_vr_menu() -> void:
 	if is_instance_valid(vr_menu):
 		vr_menu.visible = false
@@ -223,19 +240,19 @@ func _poll_xr_input(delta: float) -> void:
 		release_grab()
 	xr_trigger_down = trigger_now
 
-	var grip_now := right_hand.get_float(&"grip") > 0.62
+	var grip_now := right_hand.get_float(&"grip") > 0.62 or right_hand.is_button_pressed(&"grip_click")
 	if grip_now and not xr_grip_down:
 		_push_from(right_hand)
 	xr_grip_down = grip_now
 
-	var anchor_now := left_hand.get_float(&"trigger") > 0.62
+	var anchor_now := left_hand.get_float(&"trigger") > 0.62 or left_hand.get_float(&"grip") > 0.62 or left_hand.is_button_pressed(&"grip_click")
 	if anchor_now and not xr_anchor_down:
 		var hit := _raycast_from(left_hand)
 		if not hit.is_empty() and hit["collider"] is ThoughtProp:
 			anchor_requested.emit(hit["collider"] as ThoughtProp)
 	xr_anchor_down = anchor_now
 
-	var skip_now := left_hand.is_button_pressed(&"primary_click")
+	var skip_now := left_hand.is_button_pressed(&"primary_click") or left_hand.is_button_pressed(&"ax_button")
 	if skip_now and not xr_skip_down:
 		skip_requested.emit()
 	xr_skip_down = skip_now
@@ -367,6 +384,8 @@ func _build_vr_menu() -> void:
 	vr_menu.visible = false
 	vr_menu.start_requested.connect(func() -> void: menu_start_requested.emit())
 	vr_menu.tutorial_requested.connect(func() -> void: menu_tutorial_requested.emit())
+	vr_menu.main_menu_requested.connect(func() -> void: menu_main_requested.emit())
+	vr_menu.difficulty_changed.connect(func(hard: bool) -> void: menu_difficulty_changed.emit(hard))
 	xr_camera.add_child(vr_menu)
 
 

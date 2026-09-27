@@ -19,7 +19,9 @@ var calm_mode := false
 var anchors_left := 0
 var room_transitioning := false
 var audio_enabled := true
+var hard_mode := false
 var tutorial_room: Dictionary = {}
+var current_room_data: Dictionary = {}
 var tutorial_step := 0
 var tutorial_push_thought: ThoughtProp
 var tutorial_push_origin := Vector3.ZERO
@@ -37,6 +39,7 @@ const TUTORIAL_OBJECTIVES := [
 ]
 
 var rooms: Array[Dictionary] = []
+var hard_rooms: Array[Dictionary] = []
 var room_builder: RoomBuilder
 var player: PlayerController
 var hud: GameHud
@@ -46,6 +49,7 @@ var guide: GuideRobot
 
 func _ready() -> void:
 	rooms = RoomCatalog.all_rooms()
+	hard_rooms = RoomCatalog.hard_rooms()
 	tutorial_room = RoomCatalog.tutorial_room()
 	_build_world_environment()
 	_create_game_systems()
@@ -74,10 +78,14 @@ func _create_game_systems() -> void:
 	hud.start_pressed.connect(_start_game)
 	hud.tutorial_pressed.connect(_start_tutorial)
 	hud.restart_pressed.connect(_start_game)
+	hud.menu_pressed.connect(_return_to_title)
+	hud.difficulty_changed.connect(_set_hard_mode)
 	hud.calm_changed.connect(_set_calm_mode)
 	add_child(hud)
 	player.menu_start_requested.connect(_start_game)
 	player.menu_tutorial_requested.connect(_start_tutorial)
+	player.menu_main_requested.connect(_return_to_title)
+	player.menu_difficulty_changed.connect(_set_hard_mode)
 	player.menu_controls_requested.connect(hud.toggle_vr_controls)
 	player.guide_hit.connect(func(source_position: Vector3) -> void: guide.take_hit(source_position))
 	player.thought_grabbed.connect(_on_thought_grabbed)
@@ -151,6 +159,14 @@ func _start_tutorial() -> void:
 	_load_tutorial()
 
 
+func _return_to_title() -> void:
+	room_transitioning = false
+	current_gravity = Vector3.ZERO
+	player.release_grab()
+	room_builder.clear_room()
+	_show_title()
+
+
 func _restart_room() -> void:
 	if game_state == GameState.PLAYING:
 		_load_room(room_index)
@@ -165,10 +181,11 @@ func _load_tutorial() -> void:
 	hud.show_game()
 	sequence_step = 0
 	anchors_left = int(tutorial_room["anchors"])
-	room_builder.build_room(tutorial_room)
+	current_room_data = tutorial_room
+	room_builder.build_room(current_room_data)
 	room_builder.set_calm_mode(calm_mode)
 	var viewer: Node3D = player.xr_camera if player.xr_enabled else player.desktop_camera
-	guide.enter_tutorial(tutorial_room, viewer)
+	guide.enter_tutorial(current_room_data, viewer)
 	phase = Phase.DRIFT
 	phase_time_left = float(tutorial_room["drift"])
 	current_gravity = Vector3.ZERO
@@ -188,7 +205,9 @@ func _load_room(index: int, keep_transition := false) -> void:
 	player.set_vr_objective_visible(true)
 	hud.show_game()
 	sequence_step = 0
-	var room := rooms[index]
+	var source_room := hard_rooms[index] if hard_mode else rooms[index]
+	var room := _configured_room(source_room)
+	current_room_data = room
 	anchors_left = int(room["anchors"])
 	room_builder.build_room(room)
 	room_builder.set_calm_mode(calm_mode)
@@ -209,9 +228,9 @@ func _begin_drift() -> void:
 
 func _begin_warning() -> void:
 	phase = Phase.WARNING
-	phase_time_left = 5.0
+	phase_time_left = _warning_duration()
 	current_gravity = Vector3.ZERO
-	warned_second = 6
+	warned_second = int(ceil(phase_time_left)) + 1
 	audio.play_tone(82.0, 1.3, -16.0)
 	room_builder.highlight_next_plates(_next_direction())
 	guide.on_warning(GameColors.direction_name(_next_direction()))
@@ -255,7 +274,7 @@ func _process(delta: float) -> void:
 			var second := int(ceil(phase_time_left))
 			if second != warned_second and second > 0:
 				warned_second = second
-				audio.play_tone(380.0 + (5 - second) * 55.0, 0.09, -15.0)
+				audio.play_tone(380.0 + (_warning_duration() - second) * 55.0, 0.09, -15.0)
 			if phase_time_left <= 0.0:
 				_begin_fall()
 		Phase.FALLING:
@@ -360,11 +379,13 @@ func _finish_game() -> void:
 	game_state = GameState.COMPLETE
 	guide.leave_room()
 	player.set_playing(false)
+	player.show_vr_finish_menu()
 	room_builder.show_awakening_message()
 	var elapsed := int((Time.get_ticks_msec() - run_started_msec) / 1000.0)
 	var minutes := elapsed / 60
 	var seconds := elapsed % 60
-	hud.show_finish("%02d:%02d · gravity shifts: %d\nAll three dream layers complete" % [minutes, seconds, cycles_used])
+	var difficulty_name := "HARD" if hard_mode else "NORMAL"
+	hud.show_finish("%02d:%02d · gravity shifts: %d · %s\nAll three dream layers complete" % [minutes, seconds, cycles_used, difficulty_name])
 	player.set_wrist_text("AWAKENING\nEvery thought is in place")
 	audio.play_chord()
 
@@ -405,6 +426,12 @@ func _set_calm_mode(value: bool) -> void:
 	calm_mode = value
 	room_builder.set_calm_mode(value)
 	_update_status()
+
+
+func _set_hard_mode(value: bool) -> void:
+	hard_mode = value
+	hud.set_hard_mode(value)
+	player.set_menu_hard_mode(value)
 
 
 func _next_direction() -> Vector3:
@@ -457,14 +484,28 @@ func _update_status() -> void:
 func _vignette_strength() -> float:
 	var strength := 0.08
 	if phase == Phase.WARNING:
-		strength = lerpf(0.18, 0.72, 1.0 - phase_time_left / 5.0)
+		strength = lerpf(0.18, 0.72, 1.0 - phase_time_left / _warning_duration())
 	elif phase == Phase.FALLING:
 		strength = 0.54
 	return strength * 0.42 if calm_mode else strength
 
 
 func _active_room() -> Dictionary:
-	return tutorial_room if game_state == GameState.TUTORIAL else rooms[room_index]
+	return current_room_data
+
+
+func _configured_room(source: Dictionary) -> Dictionary:
+	var result := source.duplicate(true)
+	if hard_mode:
+		result["drift"] = maxf(8.0, float(result["drift"]) * 0.65)
+		result["subtitle"] = "%s · HARD" % str(result["subtitle"])
+	return result
+
+
+func _warning_duration() -> float:
+	if game_state == GameState.PLAYING and hard_mode:
+		return 3.0
+	return 5.0
 
 
 func _is_gameplay_active() -> bool:
@@ -520,7 +561,7 @@ func _complete_tutorial_push(thought: ThoughtProp) -> void:
 	thought.linear_velocity *= 0.2
 	tutorial_push_thought = null
 	_set_tutorial_step(4)
-	guide.say_now("Push gives a quick nudge. Now point at the Memory and use left trigger or I to anchor it.", "yes", 6.0)
+	guide.say_now("Push gives a quick nudge. Aim with the left hand, then use left trigger, grip, or I to anchor it.", "yes", 6.0)
 
 
 func _check_tutorial_anchor_state() -> void:
@@ -539,7 +580,7 @@ func _complete_tutorial_anchor() -> void:
 	if tutorial_step != 4:
 		return
 	_set_tutorial_step(5)
-	guide.say_now("Anchored! It will stay fixed through the next fall. Now press P or click the left thumbstick.", "thumbsup", 6.0)
+	guide.say_now("Anchored! It will stay fixed through the next fall. Now press X, P, or click the left thumbstick.", "thumbsup", 6.0)
 
 
 func _tutorial_viewer_position() -> Vector3:

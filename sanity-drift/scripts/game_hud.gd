@@ -4,6 +4,8 @@ extends CanvasLayer
 signal start_pressed
 signal tutorial_pressed
 signal restart_pressed
+signal menu_pressed
+signal difficulty_changed(hard: bool)
 signal calm_changed(enabled: bool)
 
 var ui_root: Control
@@ -19,11 +21,14 @@ var anchors_label: Label
 var hint_label: Label
 var calm_label: Label
 var finish_stats: Label
+var difficulty_button: Button
+var finish_menu_button: Button
 var guide_panel: PanelContainer
 var guide_label: Label
 var vignette_material: ShaderMaterial
 var transition_overlay: ColorRect
 var transition_material: ShaderMaterial
+var hard_mode := false
 
 var default_help := "MOUSE — look   LMB — grab   RMB — push\nI — anchor   WHEEL — distance   P — skip drift\nK — guide hint   L — restart   O — comfort mode"
 
@@ -64,6 +69,12 @@ func show_finish(stats_text: String) -> void:
 	controls_panel.visible = false
 	finish_panel.visible = true
 	finish_stats.text = stats_text
+
+
+func set_hard_mode(value: bool) -> void:
+	hard_mode = value
+	if is_instance_valid(difficulty_button):
+		difficulty_button.text = "DIFFICULTY: HARD" if value else "DIFFICULTY: NORMAL"
 
 
 func update_status(room_name: String, room_subtitle: String, phase_text: String, phase_color: Color, seconds: int, next_direction: String, active_plates: int, total_plates: int, anchors: int, calm_mode: bool) -> void:
@@ -248,6 +259,13 @@ func _build_title_panel() -> void:
 	tutorial.add_theme_font_size_override("font_size", 18)
 	tutorial.pressed.connect(func() -> void: tutorial_pressed.emit())
 	content.add_child(tutorial)
+	difficulty_button = Button.new()
+	difficulty_button.name = "DifficultyButton"
+	difficulty_button.text = "DIFFICULTY: NORMAL"
+	difficulty_button.custom_minimum_size = Vector2(300, 46)
+	difficulty_button.add_theme_font_size_override("font_size", 17)
+	difficulty_button.pressed.connect(_toggle_difficulty)
+	content.add_child(difficulty_button)
 	var controls := Button.new()
 	controls.name = "VRControlsButton"
 	controls.text = "VR CONTROLS"
@@ -297,7 +315,7 @@ func _build_controls_panel() -> void:
 	content.add_child(intro)
 
 	var guide := _label(19, Color(0.94, 0.93, 1.0))
-	guide.text = "RIGHT HAND\nTrigger — remote grab · release — throw\nPoint at robot + trigger — playful bump\nGrip — push the highlighted thought\nThumbstick up / down — change grab distance\n\nLEFT HAND\nTrigger — anchor a thought until the next fall\nThumbstick click — end the Drift phase early\nWrist display — timer, next gravity, plates and anchors"
+	guide.text = "RIGHT HAND\nTrigger — remote grab · release — throw\nPoint at robot + trigger — playful bump\nGrip — push the highlighted thought\nThumbstick / trackpad up or down — change grab distance\n\nLEFT HAND\nTrigger or grip — anchor a thought until the next fall\nThumbstick / trackpad click or X — end the Drift phase early\nWrist display — timer, next gravity, plates and anchors"
 	guide.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	guide.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	guide.custom_minimum_size = Vector2(680, 300)
@@ -340,8 +358,8 @@ func _build_finish_panel() -> void:
 	content.alignment = BoxContainer.ALIGNMENT_CENTER
 	content.add_theme_constant_override("separation", 18)
 	content.set_anchors_preset(Control.PRESET_CENTER)
-	content.position = Vector2(-320, -180)
-	content.size = Vector2(640, 360)
+	content.position = Vector2(-320, -220)
+	content.size = Vector2(640, 440)
 	finish_panel.add_child(content)
 	var small := _label(16, GameColors.DEPTH)
 	small.text = "AWAKENING"
@@ -362,6 +380,13 @@ func _build_finish_panel() -> void:
 	again.add_theme_font_size_override("font_size", 18)
 	again.pressed.connect(func() -> void: restart_pressed.emit())
 	content.add_child(again)
+	finish_menu_button = Button.new()
+	finish_menu_button.name = "FinishMenuButton"
+	finish_menu_button.text = "MAIN MENU"
+	finish_menu_button.custom_minimum_size = Vector2(300, 48)
+	finish_menu_button.add_theme_font_size_override("font_size", 17)
+	finish_menu_button.pressed.connect(func() -> void: menu_pressed.emit())
+	content.add_child(finish_menu_button)
 
 
 func _build_transition_overlay() -> void:
@@ -386,6 +411,12 @@ func _set_transition_progress(value: float) -> void:
 func _set_game_hud_visible(value: bool) -> void:
 	for control in [room_label, phase_label, timer_label, compass_label, progress_label, anchors_label, hint_label, calm_label]:
 		control.visible = value
+
+
+func _toggle_difficulty() -> void:
+	hard_mode = not hard_mode
+	set_hard_mode(hard_mode)
+	difficulty_changed.emit(hard_mode)
 
 
 func _label(font_size: int, color: Color) -> Label:

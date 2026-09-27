@@ -3,6 +3,8 @@ extends Node3D
 
 signal start_requested
 signal tutorial_requested
+signal main_menu_requested
+signal difficulty_changed(hard: bool)
 
 const VIEW_SIZE := Vector2i(1000, 700)
 const PANEL_SIZE := Vector2(1.60, 1.12)
@@ -10,12 +12,17 @@ const PANEL_SIZE := Vector2(1.60, 1.12)
 var menu_viewport: SubViewport
 var start_page: Control
 var controls_page: Control
+var finish_page: Control
 var start_button: Button
 var tutorial_button: Button
+var difficulty_button: Button
 var controls_button: Button
 var back_button: Button
+var replay_button: Button
+var finish_menu_button: Button
 var cursor: ColorRect
 var hovered_button: Button
+var hard_mode := false
 
 
 func _ready() -> void:
@@ -47,7 +54,7 @@ func update_pointer(ray_origin: Vector3, ray_direction: Vector3) -> void:
 	cursor.position = pointer_position - cursor.size * 0.5
 	cursor.visible = true
 	var next_hover: Button
-	for button in [start_button, tutorial_button, controls_button, back_button]:
+	for button in [start_button, tutorial_button, difficulty_button, controls_button, back_button, replay_button, finish_menu_button]:
 		if button.is_visible_in_tree() and button.get_global_rect().has_point(pointer_position):
 			next_hover = button
 			break
@@ -59,10 +66,18 @@ func press_hovered() -> void:
 		start_requested.emit()
 	elif hovered_button == tutorial_button:
 		tutorial_requested.emit()
+	elif hovered_button == difficulty_button:
+		hard_mode = not hard_mode
+		set_hard_mode(hard_mode)
+		difficulty_changed.emit(hard_mode)
 	elif hovered_button == controls_button:
 		show_controls_page()
 	elif hovered_button == back_button:
 		show_start_page()
+	elif hovered_button == replay_button:
+		start_requested.emit()
+	elif hovered_button == finish_menu_button:
+		main_menu_requested.emit()
 
 
 func toggle_controls() -> void:
@@ -75,13 +90,28 @@ func toggle_controls() -> void:
 func show_start_page() -> void:
 	start_page.visible = true
 	controls_page.visible = false
+	finish_page.visible = false
 	_clear_hover()
 
 
 func show_controls_page() -> void:
 	start_page.visible = false
 	controls_page.visible = true
+	finish_page.visible = false
 	_clear_hover()
+
+
+func show_finish_page() -> void:
+	start_page.visible = false
+	controls_page.visible = false
+	finish_page.visible = true
+	_clear_hover()
+
+
+func set_hard_mode(value: bool) -> void:
+	hard_mode = value
+	if is_instance_valid(difficulty_button):
+		difficulty_button.text = "DIFFICULTY: HARD" if value else "DIFFICULTY: NORMAL"
 
 
 func _build_viewport() -> void:
@@ -118,6 +148,12 @@ func _build_viewport() -> void:
 	controls_page.size = VIEW_SIZE
 	menu_viewport.add_child(controls_page)
 	_build_controls_page()
+
+	finish_page = Control.new()
+	finish_page.position = Vector2.ZERO
+	finish_page.size = VIEW_SIZE
+	menu_viewport.add_child(finish_page)
+	_build_finish_page()
 
 	cursor = ColorRect.new()
 	cursor.name = "AimCursor"
@@ -161,15 +197,18 @@ func _build_start_page() -> void:
 	subtitle.size = Vector2(800, 44)
 	start_page.add_child(subtitle)
 
-	start_button = _button("ENTER THE DREAM", Vector2(190, 300), Vector2(620, 88))
+	start_button = _button("ENTER THE DREAM", Vector2(190, 290), Vector2(620, 88))
 	start_page.add_child(start_button)
-	tutorial_button = _button("TUTORIAL", Vector2(190, 408), Vector2(620, 76))
+	tutorial_button = _button("TUTORIAL", Vector2(190, 390), Vector2(620, 72))
 	start_page.add_child(tutorial_button)
-	controls_button = _button("VR CONTROLS", Vector2(190, 504), Vector2(620, 70))
+	difficulty_button = _button("DIFFICULTY: NORMAL", Vector2(190, 474), Vector2(620, 62))
+	difficulty_button.add_theme_font_size_override("font_size", 25)
+	start_page.add_child(difficulty_button)
+	controls_button = _button("VR CONTROLS", Vector2(190, 548), Vector2(620, 62))
 	start_page.add_child(controls_button)
 
 	var hint := _label("Aim with the right controller · pull trigger to select", 22, Color("8f8ab6"))
-	hint.position = Vector2(100, 612)
+	hint.position = Vector2(100, 630)
 	hint.size = Vector2(800, 34)
 	start_page.add_child(hint)
 
@@ -181,7 +220,7 @@ func _build_controls_page() -> void:
 	controls_page.add_child(title)
 
 	var guide := _label(
-		"RIGHT HAND\nTrigger  —  grab / release\nPoint at robot + trigger  —  playful bump\nGrip  —  push the highlighted thought\nThumbstick up / down  —  grab distance\n\nLEFT HAND\nTrigger  —  anchor until the next fall\nThumbstick click  —  skip the Drift phase",
+		"RIGHT HAND\nTrigger  —  grab / release\nPoint at robot + trigger  —  playful bump\nGrip  —  push the highlighted thought\nThumbstick / trackpad up or down  —  grab distance\n\nLEFT HAND\nTrigger or grip  —  anchor until the next fall\nThumbstick / trackpad click or X  —  skip the Drift phase",
 		28, Color.WHITE
 	)
 	guide.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -191,6 +230,28 @@ func _build_controls_page() -> void:
 
 	back_button = _button("BACK", Vector2(290, 535), Vector2(420, 82))
 	controls_page.add_child(back_button)
+
+
+func _build_finish_page() -> void:
+	var eyebrow := _label("AWAKENING", 24, GameColors.FLOAT)
+	eyebrow.position = Vector2(100, 82)
+	eyebrow.size = Vector2(800, 42)
+	finish_page.add_child(eyebrow)
+
+	var title := _label("YOUR THOUGHTS\nARE IN PLACE", 62, Color.WHITE)
+	title.position = Vector2(100, 132)
+	title.size = Vector2(800, 180)
+	finish_page.add_child(title)
+
+	var subtitle := _label("All dream layers complete", 27, Color("cac6ec"))
+	subtitle.position = Vector2(100, 322)
+	subtitle.size = Vector2(800, 42)
+	finish_page.add_child(subtitle)
+
+	replay_button = _button("DREAM AGAIN", Vector2(190, 400), Vector2(620, 82))
+	finish_page.add_child(replay_button)
+	finish_menu_button = _button("MAIN MENU", Vector2(190, 510), Vector2(620, 76))
+	finish_page.add_child(finish_menu_button)
 
 
 func _label(text: String, font_size: int, color: Color) -> Label:

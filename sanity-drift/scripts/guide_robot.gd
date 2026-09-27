@@ -104,6 +104,12 @@ func enter_room(data: Dictionary, index: int, camera: Node3D) -> void:
 	set_process(true)
 	dialogue_queue.clear()
 	queue_line("I am your guide. Follow me!", "wave", 3.2)
+	if data.has("guide_lines"):
+		var hard_lines: Array = data["guide_lines"]
+		for line_index in range(hard_lines.size()):
+			var emotion := "yes" if line_index % 2 == 0 else "thumbsup"
+			queue_line(str(hard_lines[line_index]), emotion, 6.0)
+		return
 	match index:
 		0:
 			queue_line("You stay at the center. Use the trigger or mouse to grab the Memory.", "yes", 5.5)

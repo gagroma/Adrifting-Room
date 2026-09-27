@@ -1,0 +1,782 @@
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+TextServer: Added interface "Dummy"
+OpenXR: Found OpenXR extension XR_KHR_vulkan_enable.
+OpenXR: Found OpenXR extension XR_KHR_vulkan_enable2.
+OpenXR: Found OpenXR extension XR_KHR_D3D11_enable.
+OpenXR: Found OpenXR extension XR_KHR_D3D12_enable.
+OpenXR: Found OpenXR extension XR_KHR_opengl_enable.
+OpenXR: Found OpenXR extension XR_KHR_win32_convert_performance_counter_time.
+OpenXR: Found OpenXR extension XR_EXT_win32_appcontainer_compatible.
+OpenXR: Found OpenXR extension XR_KHR_binding_modification.
+OpenXR: Found OpenXR extension XR_KHR_composition_layer_depth.
+OpenXR: Found OpenXR extension XR_KHR_locate_spaces.
+OpenXR: Found OpenXR extension XR_KHR_visibility_mask.
+OpenXR: Found OpenXR extension XR_EXT_active_action_set_priority.
+OpenXR: Found OpenXR extension XR_EXT_dpad_binding.
+OpenXR: Found OpenXR extension XR_EXT_eye_gaze_interaction.
+OpenXR: Found OpenXR extension XR_EXT_frame_composition_report.
+OpenXR: Found OpenXR extension XR_EXT_hand_interaction.
+OpenXR: Found OpenXR extension XR_EXT_hand_tracking.
+OpenXR: Found OpenXR extension XR_EXT_hand_tracking_data_source.
+OpenXR: Found OpenXR extension XR_EXT_hand_joints_motion_range.
+OpenXR: Found OpenXR extension XR_EXT_hp_mixed_reality_controller.
+OpenXR: Found OpenXR extension XR_EXT_local_floor.
+OpenXR: Found OpenXR extension XR_EXT_palm_pose.
+OpenXR: Found OpenXR extension XR_EXT_uuid.
+OpenXR: Found OpenXR extension XR_EXT_user_presence.
+OpenXR: Found OpenXR extension XR_EXT_view_configuration_views_change.
+OpenXR: Found OpenXR extension XR_EXT_render_model.
+OpenXR: Found OpenXR extension XR_EXT_interaction_render_model.
+OpenXR: Found OpenXR extension XR_EXT_interaction_profile_battery_state_display.
+OpenXR: Found OpenXR extension XR_FB_display_refresh_rate.
+OpenXR: Found OpenXR extension XR_HTC_vive_cosmos_controller_interaction.
+OpenXR: Found OpenXR extension XR_HTC_vive_focus3_controller_interaction.
+OpenXR: Found OpenXR extension XR_HTC_vive_wrist_tracker_interaction.
+OpenXR: Found OpenXR extension XR_MND_headless.
+OpenXR: Found OpenXR extension XR_VALVE_analog_threshold.
+OpenXR: Found OpenXR extension XR_META_performance_metrics.
+OpenXR: Found OpenXR extension XR_VALVE_timing_utils.
+OpenXR: Found OpenXR extension XR_META_recommended_layer_resolution.
+OpenXR: Found OpenXR extension XR_HTCX_vive_tracker_interaction.
+OpenXR: Found OpenXR extension XR_KHR_generic_controller.
+OpenXR: Found OpenXR extension XR_VALVE_frame_controller_interaction.
+OpenXR: Found OpenXR extension XR_EXT_debug_utils.
+OpenXR: Falling back to OpenXR 1.0
+OpenXR: Created instance for OpenXR 1.0.54
+OpenXR: Enabled extension  XR_EXT_palm_pose
+OpenXR: Enabled extension  XR_EXT_local_floor
+OpenXR: Enabled extension  XR_KHR_composition_layer_depth
+OpenXR: Enabled extension  XR_HTC_vive_cosmos_controller_interaction
+OpenXR: Enabled extension  XR_HTC_vive_focus3_controller_interaction
+OpenXR: Enabled extension  XR_HTCX_vive_tracker_interaction
+OpenXR: Enabled extension  XR_FB_display_refresh_rate
+OpenXR: Enabled extension  XR_EXT_hp_mixed_reality_controller
+OpenXR: Enabled extension  XR_KHR_visibility_mask
+OpenXR: Enabled extension  XR_VALVE_frame_controller_interaction
+OpenXR: Enabled extension  XR_KHR_generic_controller
+OpenXR: Enabled extension  XR_KHR_vulkan_enable2
+OpenXR: Running on OpenXR runtime:  SteamVR/OpenXR   2.17.10
+OpenXR: Found supported view configuration XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO.
+OpenXR: Found supported view configuration view
+ - width:  8192
+ - height:  8192
+ - sample count:  1
+ - recommended render width:  1512
+ - recommended render height:  1680
+ - recommended render sample count:  1
+OpenXR: Found supported view configuration view
+ - width:  8192
+ - height:  8192
+ - sample count:  1
+ - recommended render width:  1512
+ - recommended render height:  1680
+ - recommended render sample count:  1
+OpenXR: Found environmental blend mode XR_ENVIRONMENT_BLEND_MODE_OPAQUE.
+TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+Accessibility: AccessKit driver loaded.
+OpenXR: XrGraphicsRequirementsVulkan2KHR:
+ - minApiVersionSupported:  1.0.0
+ - maxApiVersionSupported:  1.2.0
+Accessibility: window 0 adapter created.
+Devices:
+  #0: NVIDIA NVIDIA GeForce RTX 4060 Laptop GPU - Supported, Discrete
+Optional Vulkan device extension VK_EXT_fragment_density_map not found
+Optional Vulkan device extension VK_EXT_fragment_density_map2 not found
+Optional Vulkan device extension VK_QCOM_fragment_density_map_offset not found
+Optional Vulkan device extension VK_EXT_astc_decode_mode not found
+Optional Vulkan device extension VK_EXT_texture_compression_astc_hdr not found
+Optional Vulkan device extension VK_NV_ray_tracing_validation not found
+Optional Vulkan device extension VK_KHR_external_memory_fd not found
+Optional Vulkan device extension VK_EXT_debug_marker not found
+- Vulkan Fragment Shading Rate supported:
+  Pipeline fragment shading rate
+  Primitive fragment shading rate
+  Attachment fragment shading rate, min texel size: (16, 16), max texel size: (16, 16), max fragment size: (4, 4)
+- Vulkan Fragment Density Map not supported
+- Vulkan multiview supported:
+  max view count: 32
+  max instances: 134217727
+- Vulkan subgroup:
+  size: 32
+  min size: 32
+  max size: 32
+  stages: STAGE_VERTEX, STAGE_TESSELLATION_CONTROL, STAGE_TESSELLATION_EVALUATION, STAGE_GEOMETRY, STAGE_FRAGMENT, STAGE_COMPUTE, STAGE_RAYGEN_KHR, STAGE_ANY_HIT_KHR, STAGE_CLOSEST_HIT_KHR, STAGE_MISS_KHR, STAGE_INTERSECTION_KHR, STAGE_CALLABLE_KHR, STAGE_TASK_NV, STAGE_MESH_NV
+  supported ops: FEATURE_BASIC, FEATURE_VOTE, FEATURE_ARITHMETIC, FEATURE_BALLOT, FEATURE_SHUFFLE, FEATURE_SHUFFLE_RELATIVE, FEATURE_CLUSTERED, FEATURE_QUAD, FEATURE_PARTITIONED_NV
+  quad operations in all stages
+- Vulkan Acceleration Structure supported
+  min acceleration structure scratch offset alignment: 128
+- Vulkan Raytracing supported
+  shader group handle size: 32
+  shader group handle alignment: 32
+  shader group handle size aligned: 32
+  shader group base alignment: 64
+Vulkan 1.4.329 - Forward Mobile - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU
+Startup PSO cache (6.8 MiB)
+SDL: Init OK!
+Accessibility: window 0 adapter activated.
+Using "winink" pen tablet driver...
+Creating VMA small objects pool for memory type index 1
+Shader 'CanvasSdfShaderRD' (group 0) SHA256: 54b47da3ce58bfeb483acea9e9e45b5de11793d45b2a38279aa17b08296ef514
+Loading cache for shader CanvasSdfShaderRD, variant 0
+Loading cache for shader CanvasSdfShaderRD, variant 1
+Loading cache for shader CanvasSdfShaderRD, variant 2
+Loading cache for shader CanvasSdfShaderRD, variant 3
+Loading cache for shader CanvasSdfShaderRD, variant 4
+Loading cache for shader CanvasSdfShaderRD, variant 5
+Shader 'SkeletonShaderRD' (group 0) SHA256: 08b4464d16133f4db97a8df4663b95b2b956ecd3e7addf44a16e644f488157c2
+Loading cache for shader SkeletonShaderRD, variant 0
+Loading cache for shader SkeletonShaderRD, variant 1
+Shader 'SortShaderRD' (group 0) SHA256: 8e4ebbbb19fcd734c6f15656afbe1bcd5eb3acdfdae9cab023ebd6f54c901ef8
+Loading cache for shader SortShaderRD, variant 0
+Loading cache for shader SortShaderRD, variant 1
+Loading cache for shader SortShaderRD, variant 2
+Shader 'ParticlesShaderRD' (group 0) SHA256: 8f4c25caa97a2f74d5fa5f299aabdd514f57d9737b8642ed65c20e846dad5db0
+Loading cache for shader ParticlesShaderRD, variant 0
+Shader 'ParticlesCopyShaderRD' (group 0) SHA256: 688d10aec3c2e17e8c578ba3e2db1ea2f054eedd511b1e1647952c0acaeeab72
+Loading cache for shader ParticlesCopyShaderRD, variant 0
+Loading cache for shader ParticlesCopyShaderRD, variant 1
+Loading cache for shader ParticlesCopyShaderRD, variant 2
+Loading cache for shader ParticlesCopyShaderRD, variant 3
+Loading cache for shader ParticlesCopyShaderRD, variant 4
+Loading cache for shader ParticlesCopyShaderRD, variant 5
+Loading cache for shader ParticlesCopyShaderRD, variant 6
+Loading cache for shader ParticlesCopyShaderRD, variant 7
+Loading cache for shader ParticlesCopyShaderRD, variant 8
+Loading cache for shader ParticlesCopyShaderRD, variant 9
+Loading cache for shader ParticlesCopyShaderRD, variant 10
+Loading cache for shader ParticlesCopyShaderRD, variant 11
+Loading cache for shader ParticlesCopyShaderRD, variant 12
+Loading cache for shader ParticlesCopyShaderRD, variant 13
+Loading cache for shader ParticlesCopyShaderRD, variant 14
+Loading cache for shader ParticlesCopyShaderRD, variant 15
+Loading cache for shader ParticlesCopyShaderRD, variant 16
+Loading cache for shader ParticlesCopyShaderRD, variant 17
+Loading cache for shader ParticlesCopyShaderRD, variant 18
+Loading cache for shader ParticlesCopyShaderRD, variant 19
+Loading cache for shader ParticlesCopyShaderRD, variant 20
+Shader 'CanvasShaderRD' (group 0) SHA256: 1ac5f6c8d534ebab572b3f886e38134784245fbd5fa01c7cbb6cc452e5400080
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Shader 'CanvasOcclusionShaderRD' (group 0) SHA256: 3b765d5624135f9fbf3199b6660b8387d5b904f48be0914a622e5da9b906b504
+Loading cache for shader CanvasOcclusionShaderRD, variant 0
+Loading cache for shader CanvasOcclusionShaderRD, variant 1
+Loading cache for shader CanvasOcclusionShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Shader 'TexBlitShaderRD' (group 0) SHA256: ce377a6d54cd54d45abdd915ec4cf3877fef3cbace94de3df4ed73ec0124ea0c
+Loading cache for shader TexBlitShaderRD, variant 0
+Loading cache for shader TexBlitShaderRD, variant 1
+Loading cache for shader TexBlitShaderRD, variant 2
+Loading cache for shader TexBlitShaderRD, variant 3
+Ubershaders: Enabled
+Shader 'SceneForwardMobileShaderRD' (group 0) SHA256: 34688661501bf8d3456dc67ebb9a159ba4fcc2484c5a0d80ef3a1a49064c0832
+Shader 'SceneForwardMobileShaderRD' (group 1) SHA256: 9455ad1d446fef51eb0552c7e523782169cfd1ef48749d60a394233a2747ee26
+Shader 'SceneForwardMobileShaderRD' (group 2) SHA256: 93c7c9e19baed68ba13cb6b3b6c803f036efbd994347ef022b44e0acfb385c82
+Shader 'SceneForwardMobileShaderRD' (group 3) SHA256: ee1de0deb960a58fd4a1e40a2c1ee60a420293303d391ac820a8b11576a9c40a
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Shader 'SkyShaderRD' (group 0) SHA256: 9be8c23dcd20154e4a1ab0bef919421f8c51853d47c2fe6dc91221f8cfc74997
+Loading cache for shader SkyShaderRD, variant 0
+Loading cache for shader SkyShaderRD, variant 1
+Loading cache for shader SkyShaderRD, variant 2
+Loading cache for shader SkyShaderRD, variant 3
+Loading cache for shader SkyShaderRD, variant 4
+Loading cache for shader SkyShaderRD, variant 5
+Loading cache for shader SkyShaderRD, variant 6
+Loading cache for shader SkyShaderRD, variant 7
+Loading cache for shader SkyShaderRD, variant 8
+Loading cache for shader SkyShaderRD, variant 0
+Loading cache for shader SkyShaderRD, variant 1
+Loading cache for shader SkyShaderRD, variant 2
+Loading cache for shader SkyShaderRD, variant 3
+Loading cache for shader SkyShaderRD, variant 4
+Loading cache for shader SkyShaderRD, variant 5
+Loading cache for shader SkyShaderRD, variant 6
+Loading cache for shader SkyShaderRD, variant 7
+Loading cache for shader SkyShaderRD, variant 8
+Shader 'BokehDofRasterShaderRD' (group 0) SHA256: 1f380e57658651c8d60ef77451714d9b94193105ebddfbdf453e7e81e0542a44
+Loading cache for shader BokehDofRasterShaderRD, variant 0
+Loading cache for shader BokehDofRasterShaderRD, variant 1
+Loading cache for shader BokehDofRasterShaderRD, variant 2
+Loading cache for shader BokehDofRasterShaderRD, variant 3
+Loading cache for shader BokehDofRasterShaderRD, variant 4
+Loading cache for shader BokehDofRasterShaderRD, variant 5
+Loading cache for shader BokehDofRasterShaderRD, variant 6
+Shader 'BlurRasterShaderRD' (group 0) SHA256: bf2535c6ce146bb6ed9a8594798f1e933ab97b1ad787d88c265e8409f6fee565
+Loading cache for shader BlurRasterShaderRD, variant 0
+Loading cache for shader BlurRasterShaderRD, variant 1
+Loading cache for shader BlurRasterShaderRD, variant 2
+Loading cache for shader BlurRasterShaderRD, variant 3
+Loading cache for shader BlurRasterShaderRD, variant 4
+Loading cache for shader BlurRasterShaderRD, variant 5
+Loading cache for shader BlurRasterShaderRD, variant 6
+Shader 'CopyShaderRD' (group 0) SHA256: 23f6cf7986b46c68792dfd3f087267f14eebc49382f0c0fd265b45462b58afcf
+Loading cache for shader CopyShaderRD, variant 0
+Loading cache for shader CopyShaderRD, variant 1
+Loading cache for shader CopyShaderRD, variant 2
+Loading cache for shader CopyShaderRD, variant 3
+Loading cache for shader CopyShaderRD, variant 4
+Loading cache for shader CopyShaderRD, variant 5
+Loading cache for shader CopyShaderRD, variant 6
+Loading cache for shader CopyShaderRD, variant 7
+Loading cache for shader CopyShaderRD, variant 8
+Loading cache for shader CopyShaderRD, variant 9
+Loading cache for shader CopyShaderRD, variant 10
+Loading cache for shader CopyShaderRD, variant 11
+Loading cache for shader CopyShaderRD, variant 12
+Shader 'CopyToFbShaderRD' (group 0) SHA256: d00e29e632391ed3791124b988da290d922da3d9e2083273523bd8173b24ff97
+Loading cache for shader CopyToFbShaderRD, variant 0
+Loading cache for shader CopyToFbShaderRD, variant 1
+Loading cache for shader CopyToFbShaderRD, variant 2
+Loading cache for shader CopyToFbShaderRD, variant 3
+Loading cache for shader CopyToFbShaderRD, variant 4
+Loading cache for shader CopyToFbShaderRD, variant 5
+Shader 'CubeToDpShaderRD' (group 0) SHA256: 9825f5ee942047b6912a1b6fe49935a8c928598f40d2cdfc64a0f61134deed27
+Loading cache for shader CubeToDpShaderRD, variant 0
+Shader 'CubeToOctmapShaderRD' (group 0) SHA256: 8bf32929c5b41445f085dd302ccba233028481a94d43ce1b531bc8e2e66677a4
+Loading cache for shader CubeToOctmapShaderRD, variant 0
+Shader 'OctmapDownsamplerShaderRD' (group 0) SHA256: c79c7ea0ebc9a0833c5f465f1c555216a15727d2c4e3a227e9d5cd1e80f0669e
+Loading cache for shader OctmapDownsamplerShaderRD, variant 0
+Loading cache for shader OctmapDownsamplerShaderRD, variant 1
+Shader 'OctmapFilterShaderRD' (group 0) SHA256: a511f5ad922f5d701a26f801b4f9c96406071103345fa83fd394f8954c1dd7ac
+Loading cache for shader OctmapFilterShaderRD, variant 0
+Loading cache for shader OctmapFilterShaderRD, variant 1
+Loading cache for shader OctmapFilterShaderRD, variant 2
+Loading cache for shader OctmapFilterShaderRD, variant 3
+Loading cache for shader OctmapFilterShaderRD, variant 4
+Loading cache for shader OctmapFilterShaderRD, variant 5
+Loading cache for shader OctmapFilterShaderRD, variant 6
+Loading cache for shader OctmapFilterShaderRD, variant 7
+Shader 'OctmapRoughnessShaderRD' (group 0) SHA256: 9f66b38742366834aef44d557fed0d0753432ffb2cf24eebb14792092fc26b83
+Loading cache for shader OctmapRoughnessShaderRD, variant 0
+Loading cache for shader OctmapRoughnessShaderRD, variant 1
+Shader 'SpecularMergeShaderRD' (group 0) SHA256: 38d1cf8969e8f223baa218cbcd7ad415e6e945247fdb8cefddabba66acaab0e4
+Loading cache for shader SpecularMergeShaderRD, variant 0
+Loading cache for shader SpecularMergeShaderRD, variant 1
+Loading cache for shader SpecularMergeShaderRD, variant 2
+Loading cache for shader SpecularMergeShaderRD, variant 3
+Loading cache for shader SpecularMergeShaderRD, variant 4
+Loading cache for shader SpecularMergeShaderRD, variant 5
+Loading cache for shader SpecularMergeShaderRD, variant 6
+Loading cache for shader SpecularMergeShaderRD, variant 7
+Shader 'ShadowFrustumShaderRD' (group 0) SHA256: 7aba7a73f7499f30591bb36c54f106926052cdc0048232d9054de723408b1ea2
+Loading cache for shader ShadowFrustumShaderRD, variant 0
+Shader 'MotionVectorsShaderRD' (group 0) SHA256: 21fe2ffffa991405f5c0b4bb35dd8789b4049f8e56d80a5aa61aa8233992e3c1
+Loading cache for shader MotionVectorsShaderRD, variant 0
+Shader 'LuminanceReduceRasterShaderRD' (group 0) SHA256: c30b2789782a74a245eb2c403712b700e22f0a331dbd7f20cdeaff4331481520
+Loading cache for shader LuminanceReduceRasterShaderRD, variant 0
+Loading cache for shader LuminanceReduceRasterShaderRD, variant 1
+Loading cache for shader LuminanceReduceRasterShaderRD, variant 2
+Shader 'SmaaEdgeDetectionShaderRD' (group 0) SHA256: 749ffc0281a6ab411cf5a66f2560a2f33f9a258f57c513c67047f363e5e7ab33
+Loading cache for shader SmaaEdgeDetectionShaderRD, variant 0
+Shader 'SmaaWeightCalculationShaderRD' (group 0) SHA256: 510ed0d4e978b1a21f4e459da4ee2516c38f4460931e2a5714dae17c8b5547c2
+Loading cache for shader SmaaWeightCalculationShaderRD, variant 0
+Shader 'SmaaBlendingShaderRD' (group 0) SHA256: daa696d3938d7aadbc85111a68936e774199a2ded78d364782d43ef580b5296d
+Loading cache for shader SmaaBlendingShaderRD, variant 0
+Shader 'TonemapMobileShaderRD' (group 0) SHA256: 2ec4e4112fe9380f41247c1f7000cbb8b341b42bd3843e4410e96b245445ed8c
+Loading cache for shader TonemapMobileShaderRD, variant 0
+Loading cache for shader TonemapMobileShaderRD, variant 1
+Loading cache for shader TonemapMobileShaderRD, variant 2
+Loading cache for shader TonemapMobileShaderRD, variant 3
+Loading cache for shader TonemapMobileShaderRD, variant 4
+Loading cache for shader TonemapMobileShaderRD, variant 5
+Loading cache for shader TonemapMobileShaderRD, variant 6
+Loading cache for shader TonemapMobileShaderRD, variant 7
+Shader 'VrsShaderRD' (group 0) SHA256: 9df305f4045418de07830cd11c3be6abf40ea73a66b1fc87b5e04821ac4f402c
+Loading cache for shader VrsShaderRD, variant 0
+Loading cache for shader VrsShaderRD, variant 1
+Loading cache for shader VrsShaderRD, variant 2
+Loading cache for shader VrsShaderRD, variant 3
+Shader 'ResolveRasterShaderRD' (group 0) SHA256: 919d2b60f5aa1b0320eec81a5e401ee189ede55df21d4174ce5f7c6e0b1a40e1
+Loading cache for shader ResolveRasterShaderRD, variant 0
+Shader 'BlitShaderRD' (group 0) SHA256: 29b32016e1c23e0db5906fbe9b87108e39e7f5965c0016eb53fc5e1c03293243
+WASAPI: Activated output_device using IAudioClient3 interface
+WASAPI: wFormatTag = 65534
+WASAPI: nChannels = 2
+WASAPI: nSamplesPerSec = 44100
+WASAPI: nAvgBytesPerSec = 352800
+WASAPI: nBlockAlign = 8
+WASAPI: wBitsPerSample = 32
+WASAPI: cbSize = 22
+WASAPI: mix_rate = 44100
+WASAPI: fundamental_period_frames = 441
+WASAPI: min_period_frames = 441
+WASAPI: max_period_frames = 441
+WASAPI: selected a period frame size of 441
+WASAPI: detected 2 channels
+WASAPI: audio buffer frames: 441 calculated latency: 10ms
+
+Loading cache for shader BlitShaderRD, variant 0
+Loading cache for shader BlitShaderRD, variant 1
+Loading cache for shader BlitShaderRD, variant 2
+Loading cache for shader BlitShaderRD, variant 3
+TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+Loading resource: res://openxr_action_map.tres remapped: res://openxr_action_map.tres
+Completed load for: 'res://openxr_action_map.tres' remapped 'res://openxr_action_map.tres' at thread -1
+OpenXR: Top level path /user/eyes_ext requires extension XR_EXT_eye_gaze_interaction
+OpenXR: Interaction profile /interaction_profiles/bytedance/pico4_controller requires extension XR_BD_controller_interaction or OPENXR_1_1
+OpenXR: Interaction profile /interaction_profiles/ext/hand_interaction_ext requires extension XR_EXT_hand_interaction
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Shader cache miss for SceneForwardMobileShaderRD/ee1de0deb960a58fd4a1e40a2c1ee60a420293303d391ac820a8b11576a9c40a/5fc976d5bc122ef2cb484bd88b87217be68aa8e6
+OpenXR: Found supported reference space XR_REFERENCE_SPACE_TYPE_VIEW.
+OpenXR: Found supported reference space XR_REFERENCE_SPACE_TYPE_LOCAL.
+OpenXR: Found supported reference space XR_REFERENCE_SPACE_TYPE_STAGE.
+OpenXR: Found supported reference space XR_REFERENCE_SPACE_TYPE_LOCAL_FLOOR.
+OpenXR: Found supported swapchain format VK_FORMAT_R8G8B8A8_SRGB
+OpenXR: Found supported swapchain format VK_FORMAT_B8G8R8A8_SRGB
+OpenXR: Found supported swapchain format VK_FORMAT_R32G32B32A32_SFLOAT
+OpenXR: Found supported swapchain format VK_FORMAT_R32G32B32_SFLOAT
+OpenXR: Found supported swapchain format VK_FORMAT_R16G16B16A16_SFLOAT
+OpenXR: Found supported swapchain format VK_FORMAT_A2B10G10R10_UNORM_PACK32
+OpenXR: Found supported swapchain format VK_FORMAT_D32_SFLOAT
+OpenXR: Found supported swapchain format VK_FORMAT_D16_UNORM
+OpenXR: Found supported swapchain format VK_FORMAT_D24_UNORM_S8_UINT
+OpenXR: Found supported swapchain format VK_FORMAT_D32_SFLOAT_S8_UINT
+Using color swap chain format:VK_FORMAT_R8G8B8A8_SRGB
+XR: Primary interface set to: OpenXR
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+CORE API HASH: 3769296884
+EDITOR API HASH: 3146738256
+SceneTreeFTI: traversal method DEFAULT
+Loaded system CA certificates
+Loading resource: res://main.tscn remapped: res://main.tscn
+Loading resource: res://scripts/main.gd remapped: res://scripts/main.gd
+Loading resource: res://Robot.fbx remapped: res://Robot.fbx
+Loading resource: res://.godot/imported/Robot.fbx-4cde25073f81947654a151c85f8c9084.scn remapped: res://.godot/imported/Robot.fbx-4cde25073f81947654a151c85f8c9084.scn
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Completed load for: 'res://Robot.fbx' remapped 'res://Robot.fbx' at thread -1
+Loading resource: res://sfx/robot-sound1.wav remapped: res://sfx/robot-sound1.wav
+Loading resource: res://.godot/imported/robot-sound1.wav-1f0e61950994c849fa30a88986ebab97.sample remapped: res://.godot/imported/robot-sound1.wav-1f0e61950994c849fa30a88986ebab97.sample
+Completed load for: 'res://sfx/robot-sound1.wav' remapped 'res://sfx/robot-sound1.wav' at thread -1
+Loading resource: res://sfx/robot-sound2.wav remapped: res://sfx/robot-sound2.wav
+Loading resource: res://.godot/imported/robot-sound2.wav-c036f3c32bcf6ae5e433906d7b79bfa2.sample remapped: res://.godot/imported/robot-sound2.wav-c036f3c32bcf6ae5e433906d7b79bfa2.sample
+Completed load for: 'res://sfx/robot-sound2.wav' remapped 'res://sfx/robot-sound2.wav' at thread -1
+Loading resource: res://sfx/robot-hit.wav remapped: res://sfx/robot-hit.wav
+Loading resource: res://.godot/imported/robot-hit.wav-7222d8ef483732b009232aa5f06e42ba.sample remapped: res://.godot/imported/robot-hit.wav-7222d8ef483732b009232aa5f06e42ba.sample
+Completed load for: 'res://sfx/robot-hit.wav' remapped 'res://sfx/robot-hit.wav' at thread -1
+Completed load for: 'res://scripts/main.gd' remapped 'res://scripts/main.gd' at thread -1
+Completed load for: 'res://main.tscn' remapped 'res://main.tscn' at thread -1
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+OpenXR EVENT: session state changed to XR_SESSION_STATE_IDLE
+On state idle
+OpenXR EVENT: session state changed to XR_SESSION_STATE_READY
+On state ready
+OpenVR Head pose now tracking with high confidence
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_foot changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_foot changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_shoulder changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_shoulder changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_elbow changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_elbow changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_knee changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_knee changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/waist changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/chest changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/camera changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/keyboard changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_wrist changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_wrist changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_ankle changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_ankle changed to /interaction_profiles/none
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+OpenXR View pose became valid
+MultiUmaBuffer 'RENDER_LIST_ALPHA' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: interaction profile changed!
+OpenXR EVENT: interaction profile changed!
+OpenXR EVENT: interaction profile changed!
+OpenXR EVENT: interaction profile changed!
+OpenXR: Interaction profile for /user/hand/right changed to /interaction_profiles/htc/vive_controller
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_foot changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_foot changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_shoulder changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_shoulder changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_elbow changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_elbow changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_knee changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_knee changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/waist changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/chest changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/camera changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/keyboard changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_wrist changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_wrist changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_ankle changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_ankle changed to /interaction_profiles/none
+OpenXR EVENT: interaction profile changed!
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_foot changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_foot changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_shoulder changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_shoulder changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_elbow changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_elbow changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_knee changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_knee changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/waist changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/chest changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/camera changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/keyboard changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_wrist changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_wrist changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/left_ankle changed to /interaction_profiles/none
+OpenXR: Interaction profile for /user/vive_tracker_htcx/role/right_ankle changed to /interaction_profiles/none
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenVR Head pose now tracking with low confidence
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenVR Head pose now tracking with high confidence
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_FOCUSED
+On state focused
+OpenXR EVENT: session state changed to XR_SESSION_STATE_VISIBLE
+On state visible
+OpenXR EVENT: session state changed to XR_SESSION_STATE_SYNCHRONIZED
+On state synchronized
+OpenVR Head pose now tracking with low confidence
+OpenVR Head pose now tracking with high confidence

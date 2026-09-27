@@ -20,6 +20,9 @@ The project is split into small components. Each file owns one part of the game.
 ## Adding a room
 
 Open `scripts/room_catalog.gd` and add another dictionary to the array returned by `all_rooms()`.
+`hard_rooms()` contains the parallel hard campaign with separate props, plates,
+gravity sequences, objectives, and robot dialogue. Keep both arrays in the same
+theme order so transitions preserve the bedroom → kitchen → library structure.
 
 Each room defines:
 
@@ -65,4 +68,4 @@ changes to `main.gd`, which advances the live objective and the robot's lesson.
 
 ## Verification
 
-`tests/smoke_test.gd` checks scene loading, VR components, the title-screen controls guide, mouse grab, pressure plates, all three visual themes, the between-room flight, anchors, and the complete bedroom-to-kitchen transition. `tests/tutorial_test.gd` checks the tutorial button, every guided interaction, anchor release, completion, and return to the title menu.
+`tests/smoke_test.gd` checks scene loading, VR components, the title-screen controls guide, mouse grab, pressure plates, all three visual themes, the between-room flight, anchors, and the complete bedroom-to-kitchen transition. `tests/tutorial_test.gd` checks the tutorial button, every guided interaction, anchor release, completion, and return to the title menu. `tests/menu_finish_test.gd` checks difficulty selection and the desktop/VR final screens.
