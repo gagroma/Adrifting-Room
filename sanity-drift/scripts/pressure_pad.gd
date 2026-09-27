@@ -8,6 +8,7 @@ const FALSE_ACCEPT_SECONDS := 5.0
 
 var gravity_direction := Vector3.DOWN
 var required_mass := 1.0
+var maximum_mass := INF
 var plate_size := Vector2(2.25, 2.25)
 var latched := false
 var dwell_time := 0.0
@@ -22,6 +23,7 @@ var plate_label: Label3D
 func configure(data: Dictionary, room_half: Vector3) -> void:
 	gravity_direction = data["direction"]
 	required_mass = float(data["threshold"])
+	maximum_mass = float(data.get("maximum_mass", INF))
 	position = _wall_point(gravity_direction, float(data["u"]), float(data["v"]), room_half)
 	_build_visual(str(data["label"]))
 
@@ -63,7 +65,7 @@ func update_contact(delta: float, current_gravity: Vector3, thoughts: Array[Thou
 				return
 			mass_on_plate += thought.mass
 
-	if mass_on_plate >= required_mass:
+	if mass_on_plate >= required_mass and mass_on_plate <= maximum_mass:
 		dwell_time += delta
 		if dwell_time >= 0.22:
 			_latch()

@@ -77,7 +77,7 @@ static func hard_rooms() -> Array[Dictionary]:
 				{"direction": Vector3.DOWN, "u": -2.5, "v": -0.8, "threshold": 6.0, "label": "HEAVY"},
 				{"direction": Vector3.LEFT, "u": -0.4, "v": -1.4, "threshold": 6.0, "label": "LEFT"},
 				{"direction": Vector3.FORWARD, "u": 2.7, "v": 0.8, "threshold": 6.0, "label": "FRONT"},
-				{"direction": Vector3.UP, "u": 2.5, "v": -0.8, "threshold": 0.5, "label": "LIGHT"}
+				{"direction": Vector3.UP, "u": 2.5, "v": -0.8, "threshold": 0.5, "maximum_mass": 1.0, "label": "LIGHT"}
 			]
 		},
 		{
@@ -150,7 +150,7 @@ static func all_rooms() -> Array[Dictionary]:
 			],
 			"pads": [
 				{"direction": Vector3.DOWN, "u": -2.2, "v": -0.4, "threshold": 6.0, "label": "HEAVY"},
-				{"direction": Vector3.UP, "u": 2.2, "v": -0.4, "threshold": 0.5, "label": "LIGHT"}
+				{"direction": Vector3.UP, "u": 2.2, "v": -0.4, "threshold": 0.5, "maximum_mass": 1.0, "label": "LIGHT"}
 			]
 		},
 		{

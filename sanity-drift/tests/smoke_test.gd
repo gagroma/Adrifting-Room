@@ -128,6 +128,18 @@ func _run() -> void:
 	_check(builder.plates.size() == 2, "kitchen has two plates")
 	_check("heavy thought" in player.vr_objective.objective_label.text, "VR puzzle panel updates for the kitchen")
 	_check(guide.visible and guide.room_number == 1, "guide follows into the kitchen")
+	var light_plate := builder.plates.filter(func(plate: PressurePad) -> bool: return plate.gravity_direction == Vector3.UP)[0] as PressurePad
+	var heavy_thought := builder.thoughts.filter(func(thought: ThoughtProp) -> bool: return thought.thought_kind == "memory")[0] as ThoughtProp
+	var joy_thought := builder.thoughts.filter(func(thought: ThoughtProp) -> bool: return thought.thought_kind == "joy")[0] as ThoughtProp
+	for thought in builder.thoughts:
+		thought.global_position = Vector3.ZERO
+	heavy_thought.global_position = light_plate.global_position - Vector3.UP * 0.62
+	light_plate.update_contact(0.3, Vector3.UP, builder.thoughts)
+	_check(not light_plate.latched, "the LIGHT plate rejects an 8 kg memory")
+	heavy_thought.global_position = Vector3.ZERO
+	joy_thought.global_position = light_plate.global_position - Vector3.UP * 0.62
+	light_plate.update_contact(0.3, Vector3.UP, builder.thoughts)
+	_check(light_plate.latched, "the LIGHT plate accepts 0.8 kg Joy")
 
 	game.call("_load_room", 2)
 	await process_frame
