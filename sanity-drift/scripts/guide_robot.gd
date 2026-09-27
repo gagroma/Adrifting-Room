@@ -50,6 +50,9 @@ func _ready() -> void:
 	speech.position = Vector3(0.0, 2.25, 0.0)
 	speech.font_size = 64
 	speech.pixel_size = 0.004
+	speech.width = 920.0
+	speech.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	speech.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	speech.outline_size = 14
 	speech.modulate = Color.WHITE
 	speech.outline_modulate = GameColors.DARK
@@ -111,6 +114,17 @@ func enter_room(data: Dictionary, index: int, camera: Node3D) -> void:
 		2:
 			queue_line("This room has two plates. The sequence shows which way gravity turns.", "wave", 5.0)
 			queue_line("Anchor a thought to hold it in place until the next fall.", "thumbsup", 5.0)
+
+
+func enter_tutorial(data: Dictionary, camera: Node3D) -> void:
+	enter_room(data, -1, camera)
+	dialogue_queue.clear()
+	queue_line("Welcome to training. I will wait while you try every action.", "wave", 4.5)
+	queue_line("First, aim at the floating Memory and grab it with right trigger or the left mouse button.", "yes", 6.0)
+
+
+func set_objective(text: String) -> void:
+	room_data["objective"] = text
 
 
 func leave_room() -> void:

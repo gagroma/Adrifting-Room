@@ -59,6 +59,10 @@ plays `sfx/robot-hit.wav`, pauses dialogue, lifts the robot into a short drift,
 lands it on the floor, and walks it back to its position at the instant of the hit.
 The separate head mesh turns toward the active camera while dialogue is visible.
 
+The training room is defined by `RoomCatalog.tutorial_room()` and runs as a
+separate game mode. `PlayerController` reports grab, release, push, and distance
+changes to `main.gd`, which advances the live objective and the robot's lesson.
+
 ## Verification
 
-`tests/smoke_test.gd` checks scene loading, VR components, the title-screen controls guide, mouse grab, pressure plates, all three visual themes, the between-room flight, anchors, and the complete bedroom-to-kitchen transition.
+`tests/smoke_test.gd` checks scene loading, VR components, the title-screen controls guide, mouse grab, pressure plates, all three visual themes, the between-room flight, anchors, and the complete bedroom-to-kitchen transition. `tests/tutorial_test.gd` checks the tutorial button, every guided interaction, anchor release, completion, and return to the title menu.

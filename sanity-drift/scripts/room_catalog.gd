@@ -2,6 +2,25 @@ class_name RoomCatalog
 extends RefCounted
 
 
+static func tutorial_room() -> Dictionary:
+	return {
+		"name": "TRAINING DREAM",
+		"theme": "bedroom",
+		"subtitle": "Learn to guide a drifting thought",
+		"objective": "Listen to the robot guide.",
+		"accent": GameColors.FLOAT,
+		"drift": 120.0,
+		"anchors": 1,
+		"sequence": [Vector3.DOWN],
+		"props": [
+			{"kind": "memory", "position": Vector3(0.0, 1.4, -0.7)}
+		],
+		"pads": [
+			{"direction": Vector3.DOWN, "u": 0.0, "v": -1.0, "threshold": 6.0, "label": "TRAINING"}
+		]
+	}
+
+
 static func all_rooms() -> Array[Dictionary]:
 	return [
 		{

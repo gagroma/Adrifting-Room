@@ -13,7 +13,9 @@ Use `play_sanity_drift_desktop.cmd` to test without a headset.
 
 ## Controls
 
-The title screen includes a `VR CONTROLS` button with the complete in-game guide.
+The title screen includes a `TUTORIAL` button for an interactive training room
+and a `VR CONTROLS` button with the complete in-game guide. In the tutorial, the
+same robot from the main dream waits for each action before explaining the next.
 
 ### VR
 
@@ -32,12 +34,13 @@ The title screen includes a `VR CONTROLS` button with the complete in-game guide
 - `RMB` — push the highlighted thought
 - `Mouse` — look around
 - `Wheel` — move a held thought closer or farther away
-- `A` — anchor a thought until the next fall
-- `Space` — end the Drift phase early
-- `C` — comfort mode
-- `H` — ask the robot guide to repeat the room objective
-- `R` — restart the room
+- `I` — anchor a thought until the next fall
+- `P` — end the Drift phase early
+- `O` — comfort mode
+- `K` — ask the robot guide to repeat the room objective
+- `L` — restart the room
 - `Esc` — release the cursor; click to capture it again
+- `U` — start the tutorial from the title screen
 
 Room shapes, materials, and sounds are generated inside the game. The robot guide uses the imported `Robot.fbx` model.
 

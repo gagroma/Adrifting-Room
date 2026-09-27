@@ -2,6 +2,7 @@ class_name VRMenu
 extends Node3D
 
 signal start_requested
+signal tutorial_requested
 
 const VIEW_SIZE := Vector2i(1000, 700)
 const PANEL_SIZE := Vector2(1.60, 1.12)
@@ -10,6 +11,7 @@ var menu_viewport: SubViewport
 var start_page: Control
 var controls_page: Control
 var start_button: Button
+var tutorial_button: Button
 var controls_button: Button
 var back_button: Button
 var cursor: ColorRect
@@ -45,7 +47,7 @@ func update_pointer(ray_origin: Vector3, ray_direction: Vector3) -> void:
 	cursor.position = pointer_position - cursor.size * 0.5
 	cursor.visible = true
 	var next_hover: Button
-	for button in [start_button, controls_button, back_button]:
+	for button in [start_button, tutorial_button, controls_button, back_button]:
 		if button.is_visible_in_tree() and button.get_global_rect().has_point(pointer_position):
 			next_hover = button
 			break
@@ -55,6 +57,8 @@ func update_pointer(ray_origin: Vector3, ray_direction: Vector3) -> void:
 func press_hovered() -> void:
 	if hovered_button == start_button:
 		start_requested.emit()
+	elif hovered_button == tutorial_button:
+		tutorial_requested.emit()
 	elif hovered_button == controls_button:
 		show_controls_page()
 	elif hovered_button == back_button:
@@ -157,13 +161,15 @@ func _build_start_page() -> void:
 	subtitle.size = Vector2(800, 44)
 	start_page.add_child(subtitle)
 
-	start_button = _button("ENTER THE DREAM", Vector2(190, 320), Vector2(620, 96))
+	start_button = _button("ENTER THE DREAM", Vector2(190, 300), Vector2(620, 88))
 	start_page.add_child(start_button)
-	controls_button = _button("VR CONTROLS", Vector2(190, 448), Vector2(620, 84))
+	tutorial_button = _button("TUTORIAL", Vector2(190, 408), Vector2(620, 76))
+	start_page.add_child(tutorial_button)
+	controls_button = _button("VR CONTROLS", Vector2(190, 504), Vector2(620, 70))
 	start_page.add_child(controls_button)
 
 	var hint := _label("Aim with the right controller · pull trigger to select", 22, Color("8f8ab6"))
-	hint.position = Vector2(100, 582)
+	hint.position = Vector2(100, 612)
 	hint.size = Vector2(800, 34)
 	start_page.add_child(hint)
 

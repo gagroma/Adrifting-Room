@@ -6,8 +6,13 @@ signal skip_requested
 signal restart_requested
 signal calm_requested
 signal menu_start_requested
+signal menu_tutorial_requested
 signal menu_controls_requested
 signal guide_hit(source_position: Vector3)
+signal thought_grabbed(thought: ThoughtProp)
+signal thought_released(thought: ThoughtProp)
+signal thought_pushed(thought: ThoughtProp)
+signal grab_distance_changed(distance: float)
 
 var playing := false
 var xr_enabled := false
@@ -135,7 +140,11 @@ func transition_in(duration := 0.9) -> Tween:
 
 func release_grab() -> void:
 	if is_instance_valid(grabbed_thought):
+		var released := grabbed_thought
 		grabbed_thought.set_grab_highlight(false)
+		grabbed_thought = null
+		thought_released.emit(released)
+		return
 	grabbed_thought = null
 
 
@@ -184,11 +193,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			_push_from(desktop_camera)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
 			grab_distance = clampf(grab_distance - 0.45, 1.5, 9.5)
+			grab_distance_changed.emit(grab_distance)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
 			grab_distance = clampf(grab_distance + 0.45, 1.5, 9.5)
+			grab_distance_changed.emit(grab_distance)
 
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.physical_keycode == KEY_A:
+		if event.physical_keycode == KEY_I:
 			var anchor_target := grabbed_thought
 			if not is_instance_valid(anchor_target):
 				var hit := _raycast_from(desktop_camera)
@@ -196,11 +207,11 @@ func _unhandled_input(event: InputEvent) -> void:
 					anchor_target = hit["collider"] as ThoughtProp
 			if is_instance_valid(anchor_target):
 				anchor_requested.emit(anchor_target)
-		elif event.physical_keycode == KEY_SPACE:
+		elif event.physical_keycode == KEY_P:
 			skip_requested.emit()
-		elif event.physical_keycode == KEY_R:
+		elif event.physical_keycode == KEY_L:
 			restart_requested.emit()
-		elif event.physical_keycode == KEY_C:
+		elif event.physical_keycode == KEY_O:
 			calm_requested.emit()
 
 
@@ -233,6 +244,7 @@ func _poll_xr_input(delta: float) -> void:
 		var distance_axis := right_hand.get_vector2(&"primary").y
 		if absf(distance_axis) > 0.18:
 			grab_distance = clampf(grab_distance + distance_axis * delta * 2.2, 0.45, 9.5)
+			grab_distance_changed.emit(grab_distance)
 
 
 func _poll_xr_menu_input() -> void:
@@ -260,6 +272,7 @@ func _begin_grab(hit: Dictionary, source_position: Vector3) -> void:
 	grabbed_thought = thought
 	grab_distance = clampf(source_position.distance_to(thought.global_position), 0.45, 9.5)
 	thought.set_grab_highlight(true)
+	thought_grabbed.emit(thought)
 
 
 func _push_from(source: Node3D) -> void:
@@ -272,6 +285,7 @@ func _push_from(source: Node3D) -> void:
 	if thought.freeze:
 		return
 	thought.apply_central_impulse(-source.global_transform.basis.z * thought.mass * 4.2)
+	thought_pushed.emit(thought)
 
 
 func _raycast_from(source: Node3D) -> Dictionary:
@@ -352,6 +366,7 @@ func _build_vr_menu() -> void:
 	vr_menu.position = Vector3(0.0, 0.04, -1.28)
 	vr_menu.visible = false
 	vr_menu.start_requested.connect(func() -> void: menu_start_requested.emit())
+	vr_menu.tutorial_requested.connect(func() -> void: menu_tutorial_requested.emit())
 	xr_camera.add_child(vr_menu)
 
 

@@ -2,6 +2,7 @@ class_name GameHud
 extends CanvasLayer
 
 signal start_pressed
+signal tutorial_pressed
 signal restart_pressed
 signal calm_changed(enabled: bool)
 
@@ -24,7 +25,7 @@ var vignette_material: ShaderMaterial
 var transition_overlay: ColorRect
 var transition_material: ShaderMaterial
 
-var default_help := "MOUSE — look   LMB — grab   RMB — push\nA — anchor   WHEEL — distance   SPACE — skip drift\nH — guide hint   R — restart   C — comfort mode"
+var default_help := "MOUSE — look   LMB — grab   RMB — push\nI — anchor   WHEEL — distance   P — skip drift\nK — guide hint   L — restart   O — comfort mode"
 
 
 func _ready() -> void:
@@ -211,10 +212,10 @@ func _build_title_panel() -> void:
 	ui_root.add_child(title_panel)
 	var content := VBoxContainer.new()
 	content.alignment = BoxContainer.ALIGNMENT_CENTER
-	content.add_theme_constant_override("separation", 12)
+	content.add_theme_constant_override("separation", 9)
 	content.set_anchors_preset(Control.PRESET_CENTER)
-	content.position = Vector2(-330, -252)
-	content.size = Vector2(660, 504)
+	content.position = Vector2(-330, -320)
+	content.size = Vector2(660, 640)
 	title_panel.add_child(content)
 	var eyebrow := _label(16, GameColors.FLOAT)
 	eyebrow.text = "A PHYSICS PUZZLE"
@@ -223,7 +224,7 @@ func _build_title_panel() -> void:
 	var title := _label(74, Color.WHITE)
 	title.text = "SANITY DRIFT"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.custom_minimum_size.y = 96
+	title.custom_minimum_size.y = 88
 	content.add_child(title)
 	var subtitle := _label(20, Color(0.82, 0.80, 0.96))
 	subtitle.text = "You stay still. Gravity does not."
@@ -232,7 +233,7 @@ func _build_title_panel() -> void:
 	var description := _label(17, Color(0.74, 0.73, 0.90))
 	description.text = "Arrange thoughts in zero gravity.\nRead where they will fall next.\nLight every plate and escape the dream."
 	description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	description.custom_minimum_size.y = 94
+	description.custom_minimum_size.y = 82
 	content.add_child(description)
 	var start := Button.new()
 	start.text = "ENTER THE DREAM"
@@ -240,6 +241,13 @@ func _build_title_panel() -> void:
 	start.add_theme_font_size_override("font_size", 19)
 	start.pressed.connect(func() -> void: start_pressed.emit())
 	content.add_child(start)
+	var tutorial := Button.new()
+	tutorial.name = "TutorialButton"
+	tutorial.text = "TUTORIAL"
+	tutorial.custom_minimum_size = Vector2(300, 48)
+	tutorial.add_theme_font_size_override("font_size", 18)
+	tutorial.pressed.connect(func() -> void: tutorial_pressed.emit())
+	content.add_child(tutorial)
 	var controls := Button.new()
 	controls.name = "VRControlsButton"
 	controls.text = "VR CONTROLS"
