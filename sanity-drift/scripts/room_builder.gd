@@ -5,6 +5,7 @@ signal plate_activated(index: int)
 signal false_thought_accepted(thought: ThoughtProp, plate: PressurePad)
 
 const ROOM_HALF := Vector3(6.0, 5.0, 6.0)
+const GravityShiftFX := preload("res://scripts/gravity_shift_fx.gd")
 
 var thoughts: Array[ThoughtProp] = []
 var plates: Array[PressurePad] = []
@@ -12,6 +13,9 @@ var door_mesh: MeshInstance3D
 var door_light: OmniLight3D
 var drift_visual: Node3D
 var calm_mode := false
+var shift_fx: Node3D
+var room_lamp: OmniLight3D
+var shift_furniture: Array[Node3D] = []
 
 
 func _ready() -> void:
@@ -19,7 +23,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if is_instance_valid(drift_visual) and not calm_mode:
+	if is_instance_valid(drift_visual) and not calm_mode and (not is_instance_valid(shift_fx) or not shift_fx.is_processing()):
 		drift_visual.rotate_y(delta * 0.025)
 		drift_visual.rotate_z(delta * 0.009)
 
@@ -35,9 +39,17 @@ func build_room(room_data: Dictionary) -> void:
 		_spawn_thought(thought_data["kind"], thought_data["position"])
 	for plate_data in room_data["pads"]:
 		_spawn_plate(plate_data)
+	shift_fx = GravityShiftFX.new()
+	shift_fx.name = "GravityShiftFX"
+	add_child(shift_fx)
+	shift_fx.configure(ROOM_HALF, room_lamp, drift_visual, shift_furniture)
+	set_calm_mode(calm_mode)
 
 
 func clear_room() -> void:
+	reset_shift_effects()
+	shift_fx = null
+	shift_furniture.clear()
 	for child in get_children():
 		child.free()
 	thoughts.clear()
@@ -45,6 +57,27 @@ func clear_room() -> void:
 	door_mesh = null
 	door_light = null
 	drift_visual = null
+	room_lamp = null
+
+
+func begin_shift_warning(direction: Vector3, duration: float) -> void:
+	if is_instance_valid(shift_fx):
+		shift_fx.begin_warning(direction, duration)
+
+
+func update_shift_warning(seconds_left: float) -> void:
+	if is_instance_valid(shift_fx):
+		shift_fx.update_warning(seconds_left)
+
+
+func play_shift_impact(direction: Vector3) -> void:
+	if is_instance_valid(shift_fx):
+		shift_fx.trigger_impact(direction)
+
+
+func reset_shift_effects() -> void:
+	if is_instance_valid(shift_fx):
+		shift_fx.reset()
 
 
 func apply_gravity(direction: Vector3, grabbed_thought: ThoughtProp) -> void:
@@ -100,6 +133,7 @@ func open_door() -> Tween:
 
 
 func disintegrate_room(duration := 1.25) -> Tween:
+	reset_shift_effects()
 	# Break the current dream layer into simple fragments and push every room
 	# element away from the player. The next room is built after this tween.
 	var rng := RandomNumberGenerator.new()
@@ -176,6 +210,8 @@ func show_awakening_message() -> void:
 
 func set_calm_mode(value: bool) -> void:
 	calm_mode = value
+	if is_instance_valid(shift_fx):
+		shift_fx.set_calm_mode(value)
 	if is_instance_valid(drift_visual):
 		drift_visual.visible = not value
 
@@ -236,6 +272,7 @@ func _build_shell(accent: Color) -> void:
 	lamp.omni_range = 10.0
 	lamp.shadow_enabled = true
 	add_child(lamp)
+	room_lamp = lamp
 
 
 func _build_theme_geometry(theme: String, accent: Color) -> void:
@@ -311,6 +348,9 @@ func _add_decor_box(box_position: Vector3, size: Vector3, color: Color, emission
 	visual.position = box_position
 	visual.material_override = GameColors.material(color, emission, transparent)
 	add_child(visual)
+	# Floor tiles stay still; only theme furniture participates in the tremble.
+	if box_position.y > -4.8:
+		shift_furniture.append(visual)
 
 
 func _add_decor_sphere(sphere_position: Vector3, radius: float, color: Color, emission := 0.0) -> void:
@@ -322,6 +362,7 @@ func _add_decor_sphere(sphere_position: Vector3, radius: float, color: Color, em
 	visual.position = sphere_position
 	visual.material_override = GameColors.material(color, emission)
 	add_child(visual)
+	shift_furniture.append(visual)
 
 
 func _add_decor_cylinder(cylinder_position: Vector3, radius: float, height: float, color: Color, emission := 0.0) -> void:
@@ -334,6 +375,7 @@ func _add_decor_cylinder(cylinder_position: Vector3, radius: float, height: floa
 	visual.position = cylinder_position
 	visual.material_override = GameColors.material(color, emission)
 	add_child(visual)
+	shift_furniture.append(visual)
 
 
 func _add_wall(wall_position: Vector3, size: Vector3, color: Color) -> void:

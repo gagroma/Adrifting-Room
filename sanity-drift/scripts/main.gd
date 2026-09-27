@@ -237,6 +237,7 @@ func _load_room(index: int, keep_transition := false) -> void:
 
 
 func _begin_drift() -> void:
+	room_builder.reset_shift_effects()
 	phase = Phase.DRIFT
 	phase_time_left = float(_active_room()["drift"])
 	current_gravity = Vector3.ZERO
@@ -253,6 +254,7 @@ func _begin_warning() -> void:
 	warned_second = int(ceil(phase_time_left)) + 1
 	audio.play_tone(82.0, 1.3, -16.0)
 	room_builder.highlight_next_plates(_next_direction())
+	room_builder.begin_shift_warning(_next_direction(), phase_time_left)
 	guide.on_warning(GameColors.direction_name(_next_direction()))
 
 
@@ -261,7 +263,8 @@ func _begin_fall() -> void:
 	phase_time_left = 3.6
 	current_gravity = _next_direction()
 	cycles_used += 1
-	audio.play_tone(120.0, 0.65, -9.0, true)
+	audio.play_gravity_impact(calm_mode)
+	room_builder.play_shift_impact(current_gravity)
 	room_builder.highlight_next_plates(current_gravity)
 
 
@@ -292,6 +295,7 @@ func _process(delta: float) -> void:
 			if phase_time_left <= 0.0:
 				_begin_warning()
 		Phase.WARNING:
+			room_builder.update_shift_warning(phase_time_left)
 			var second := int(ceil(phase_time_left))
 			if second != warned_second and second > 0:
 				warned_second = second
@@ -326,6 +330,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _complete_room() -> void:
+	room_builder.reset_shift_effects()
 	if game_state == GameState.TUTORIAL:
 		_complete_tutorial()
 		return
@@ -364,6 +369,7 @@ func _complete_room() -> void:
 
 
 func _complete_tutorial() -> void:
+	room_builder.reset_shift_effects()
 	room_transitioning = true
 	current_gravity = Vector3.ZERO
 	player.release_grab()
