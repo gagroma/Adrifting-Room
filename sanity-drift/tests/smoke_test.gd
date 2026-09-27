@@ -43,6 +43,12 @@ func _run() -> void:
 	_check(builder.plates.size() == 1, "bedroom has one plate")
 	_check(builder.thoughts[0] is ThoughtProp, "thought uses its own component")
 	_check(builder.plates[0] is PressurePad, "plate uses its own component")
+	var decor_bodies := builder.get_children().filter(func(child: Node) -> bool: return child is StaticBody3D and child.position.y > -4.8)
+	_check(decor_bodies.size() > 5, "raised bedroom furniture has physics collision")
+	var bed_bodies := decor_bodies.filter(func(child: Node) -> bool: return child.position.x < -3.0 and child.position.z < -3.0)
+	_check(not bed_bodies.is_empty(), "the bed sits against the rear wall instead of leaving a trap behind it")
+	if not bed_bodies.is_empty():
+		_check((bed_bodies[0] as StaticBody3D).get_children().any(func(child: Node) -> bool: return child is CollisionShape3D), "the repositioned bed blocks drifting thoughts")
 	_check(guide.visible and guide.model != null, "robot guide appears in the bedroom")
 	var floor_gap := Vector2(guide.global_position.x - player.desktop_camera.global_position.x, guide.global_position.z - player.desktop_camera.global_position.z).length()
 	_check(is_equal_approx(guide.position.y, GuideRobot.FLOOR_Y) and absf(floor_gap - 5.0) < 0.5, "guide starts on the floor about five meters ahead")
@@ -88,6 +94,9 @@ func _run() -> void:
 	_check(player.xr_origin is XROrigin3D, "XR origin exists")
 	_check(player.xr_camera is XRCamera3D, "XR camera exists")
 	_check(player.left_hand is XRController3D and player.right_hand is XRController3D, "both tracked controllers exist")
+	_check(player.xr_pointer.get_parent() == player.right_hand, "right controller keeps its grab aiming ray")
+	_check(player.xr_anchor_pointer.get_parent() == player.left_hand, "left controller has its own anchor aiming ray")
+	_check(player.xr_anchor_pointer.mesh is CylinderMesh and is_equal_approx((player.xr_anchor_pointer.mesh as CylinderMesh).height, 8.0), "left anchor ray matches the right aiming ray")
 	_check(player.wrist_label.pixel_size <= 0.001, "VR wrist display remains compact")
 
 	var desktop_camera := player.desktop_camera
@@ -182,7 +191,7 @@ func _run() -> void:
 	_check(player.xr_fade is MeshInstance3D, "VR comfort fade exists")
 
 	var rooms: Array = game.get("rooms")
-	_check(rooms.size() == 3, "three playable rooms exist")
+	_check(rooms.size() == 6, "three normal rooms are followed by three hard rooms")
 	_check(rooms[0]["theme"] == "bedroom", "first room uses the bedroom theme")
 	_check(rooms[1]["theme"] == "kitchen", "second room uses the kitchen theme")
 	_check(rooms[2]["theme"] == "library", "third room uses the library theme")

@@ -19,7 +19,7 @@ var calm_mode := false
 var anchors_left := 0
 var room_transitioning := false
 var audio_enabled := true
-var hard_mode := false
+var pause_active := false
 var tutorial_room: Dictionary = {}
 var current_room_data: Dictionary = {}
 var active_anchor: ThoughtProp
@@ -48,10 +48,13 @@ var hud: GameHud
 var audio: GameAudio
 var guide: GuideRobot
 
+const NORMAL_ROOM_COUNT := 3
+
 
 func _ready() -> void:
 	rooms = RoomCatalog.all_rooms()
 	hard_rooms = RoomCatalog.hard_rooms()
+	rooms.append_array(hard_rooms)
 	tutorial_room = RoomCatalog.tutorial_room()
 	_build_world_environment()
 	_create_game_systems()
@@ -74,6 +77,10 @@ func _create_game_systems() -> void:
 	player.skip_requested.connect(_on_skip_requested)
 	player.restart_requested.connect(_restart_room)
 	player.calm_requested.connect(func() -> void: _set_calm_mode(not calm_mode))
+	player.pause_requested.connect(_toggle_pause)
+	player.pause_resume_requested.connect(_resume_game)
+	player.pause_restart_requested.connect(_restart_from_pause)
+	player.quit_requested.connect(_quit_game)
 	add_child(player)
 
 	hud = GameHud.new()
@@ -82,13 +89,14 @@ func _create_game_systems() -> void:
 	hud.tutorial_pressed.connect(_start_tutorial)
 	hud.restart_pressed.connect(_start_or_retry)
 	hud.menu_pressed.connect(_return_to_title)
-	hud.difficulty_changed.connect(_set_hard_mode)
 	hud.calm_changed.connect(_set_calm_mode)
+	hud.pause_resume_pressed.connect(_resume_game)
+	hud.pause_restart_pressed.connect(_restart_from_pause)
+	hud.quit_pressed.connect(_quit_game)
 	add_child(hud)
 	player.menu_start_requested.connect(_start_or_retry)
 	player.menu_tutorial_requested.connect(_start_tutorial)
 	player.menu_main_requested.connect(_return_to_title)
-	player.menu_difficulty_changed.connect(_set_hard_mode)
 	player.menu_controls_requested.connect(hud.toggle_vr_controls)
 	player.guide_hit.connect(func(source_position: Vector3) -> void: guide.take_hit(source_position))
 	player.thought_grabbed.connect(_on_thought_grabbed)
@@ -134,6 +142,9 @@ func _build_world_environment() -> void:
 
 
 func _show_title() -> void:
+	if get_tree().paused:
+		get_tree().paused = false
+	pause_active = false
 	game_state = GameState.TITLE
 	guide.leave_room()
 	player.set_playing(false)
@@ -142,6 +153,9 @@ func _show_title() -> void:
 
 
 func _start_game() -> void:
+	if get_tree().paused:
+		get_tree().paused = false
+	pause_active = false
 	player.hide_vr_menu()
 	room_index = 0
 	cycles_used = 0
@@ -178,6 +192,9 @@ func _start_tutorial() -> void:
 
 
 func _return_to_title() -> void:
+	if get_tree().paused:
+		get_tree().paused = false
+	pause_active = false
 	room_transitioning = false
 	current_gravity = Vector3.ZERO
 	player.release_grab()
@@ -225,8 +242,8 @@ func _load_room(index: int, keep_transition := false) -> void:
 	player.set_vr_objective_visible(true)
 	hud.show_game()
 	sequence_step = 0
-	var source_room := hard_rooms[index] if hard_mode else rooms[index]
-	var room := _configured_room(source_room)
+	var source_room := rooms[index]
+	var room := _configured_room(source_room, index)
 	current_room_data = room
 	anchors_left = int(room["anchors"])
 	room_builder.build_room(room)
@@ -419,8 +436,7 @@ func _finish_game() -> void:
 	var elapsed := int((Time.get_ticks_msec() - run_started_msec) / 1000.0)
 	var minutes := elapsed / 60
 	var seconds := elapsed % 60
-	var difficulty_name := "HARD" if hard_mode else "NORMAL"
-	hud.show_finish("%02d:%02d · gravity shifts: %d · %s\nAll three dream layers complete" % [minutes, seconds, cycles_used, difficulty_name])
+	hud.show_finish("%02d:%02d · gravity shifts: %d\nAll six dream layers complete · NORMAL → HARD" % [minutes, seconds, cycles_used])
 	player.set_wrist_text("AWAKENING\nEvery thought is in place")
 	audio.play_chord()
 
@@ -497,10 +513,48 @@ func _set_calm_mode(value: bool) -> void:
 	_update_status()
 
 
-func _set_hard_mode(value: bool) -> void:
-	hard_mode = value
-	hud.set_hard_mode(value)
-	player.set_menu_hard_mode(value)
+func _toggle_pause() -> void:
+	if pause_active:
+		_resume_game()
+	elif _is_gameplay_active() and not room_transitioning:
+		_set_pause(true)
+
+
+func _set_pause(value: bool) -> void:
+	if value == pause_active:
+		return
+	if value:
+		pause_active = true
+		player.release_grab()
+		player.set_playing(false)
+		player.show_vr_pause_menu()
+		hud.show_pause()
+		get_tree().paused = true
+	else:
+		get_tree().paused = false
+		pause_active = false
+		player.hide_vr_pause_menu()
+		player.set_playing(true)
+		player.set_vr_objective_visible(true)
+		hud.show_game()
+		_update_status()
+
+
+func _resume_game() -> void:
+	if pause_active:
+		_set_pause(false)
+
+
+func _restart_from_pause() -> void:
+	if pause_active:
+		_set_pause(false)
+	_restart_room()
+
+
+func _quit_game() -> void:
+	if get_tree().paused:
+		get_tree().paused = false
+	get_tree().quit()
 
 
 func _next_direction() -> Vector3:
@@ -563,16 +617,15 @@ func _active_room() -> Dictionary:
 	return current_room_data
 
 
-func _configured_room(source: Dictionary) -> Dictionary:
+func _configured_room(source: Dictionary, index: int) -> Dictionary:
 	var result := source.duplicate(true)
-	if hard_mode:
+	if index >= NORMAL_ROOM_COUNT:
 		result["drift"] = maxf(8.0, float(result["drift"]) * 0.65)
-		result["subtitle"] = "%s · HARD" % str(result["subtitle"])
 	return result
 
 
 func _warning_duration() -> float:
-	if game_state == GameState.PLAYING and hard_mode:
+	if game_state == GameState.PLAYING and room_index >= NORMAL_ROOM_COUNT:
 		return 3.0
 	return 5.0
 

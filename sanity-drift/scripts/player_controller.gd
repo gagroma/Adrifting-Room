@@ -5,10 +5,13 @@ signal anchor_requested(thought: ThoughtProp)
 signal skip_requested
 signal restart_requested
 signal calm_requested
+signal pause_requested
+signal pause_resume_requested
+signal pause_restart_requested
+signal quit_requested
 signal menu_start_requested
 signal menu_tutorial_requested
 signal menu_main_requested
-signal menu_difficulty_changed(hard: bool)
 signal menu_controls_requested
 signal guide_hit(source_position: Vector3)
 signal thought_grabbed(thought: ThoughtProp)
@@ -29,6 +32,7 @@ var left_hand: XRController3D
 var right_hand: XRController3D
 var wrist_label: Label3D
 var xr_pointer: MeshInstance3D
+var xr_anchor_pointer: MeshInstance3D
 var xr_fade: MeshInstance3D
 var xr_fade_material: StandardMaterial3D
 var vr_menu: VRMenu
@@ -42,9 +46,12 @@ var xr_trigger_down := false
 var xr_grip_down := false
 var xr_anchor_down := false
 var xr_skip_down := false
+var xr_menu_down := false
+var pause_menu_open := false
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_desktop_rig()
 	_build_xr_rig()
 
@@ -117,6 +124,8 @@ func show_vr_menu() -> void:
 		wrist_label.visible = false
 	if is_instance_valid(xr_pointer):
 		xr_pointer.visible = false
+	if is_instance_valid(xr_anchor_pointer):
+		xr_anchor_pointer.visible = false
 
 
 func show_vr_finish_menu() -> void:
@@ -127,6 +136,8 @@ func show_vr_finish_menu() -> void:
 		wrist_label.visible = false
 	if is_instance_valid(xr_pointer):
 		xr_pointer.visible = false
+	if is_instance_valid(xr_anchor_pointer):
+		xr_anchor_pointer.visible = false
 
 
 func show_vr_game_over() -> void:
@@ -137,20 +148,45 @@ func show_vr_game_over() -> void:
 		wrist_label.visible = false
 	if is_instance_valid(xr_pointer):
 		xr_pointer.visible = false
+	if is_instance_valid(xr_anchor_pointer):
+		xr_anchor_pointer.visible = false
 
 
-func set_menu_hard_mode(value: bool) -> void:
+func show_vr_pause_menu() -> void:
+	pause_menu_open = true
 	if is_instance_valid(vr_menu):
-		vr_menu.set_hard_mode(value)
+		vr_menu.visible = true
+		vr_menu.show_pause_page()
+	if is_instance_valid(wrist_label):
+		wrist_label.visible = false
+	if is_instance_valid(xr_pointer):
+		xr_pointer.visible = true
+	if is_instance_valid(xr_anchor_pointer):
+		xr_anchor_pointer.visible = true
 
 
-func hide_vr_menu() -> void:
+func hide_vr_pause_menu() -> void:
+	pause_menu_open = false
 	if is_instance_valid(vr_menu):
 		vr_menu.visible = false
 	if is_instance_valid(wrist_label):
 		wrist_label.visible = true
 	if is_instance_valid(xr_pointer):
 		xr_pointer.visible = true
+	if is_instance_valid(xr_anchor_pointer):
+		xr_anchor_pointer.visible = true
+
+
+func hide_vr_menu() -> void:
+	pause_menu_open = false
+	if is_instance_valid(vr_menu):
+		vr_menu.visible = false
+	if is_instance_valid(wrist_label):
+		wrist_label.visible = true
+	if is_instance_valid(xr_pointer):
+		xr_pointer.visible = true
+	if is_instance_valid(xr_anchor_pointer):
+		xr_anchor_pointer.visible = true
 
 
 func transition_out(duration := 1.25) -> Tween:
@@ -176,7 +212,14 @@ func release_grab() -> void:
 
 
 func _process(delta: float) -> void:
-	if playing and xr_enabled:
+	if xr_enabled and (playing or pause_menu_open):
+		var menu_now := left_hand.is_button_pressed(&"menu_button")
+		if menu_now and not xr_menu_down:
+			pause_requested.emit()
+		xr_menu_down = menu_now
+	if pause_menu_open and xr_enabled:
+		_poll_xr_menu_input()
+	elif playing and xr_enabled:
 		_poll_xr_input(delta)
 	elif xr_enabled:
 		_poll_xr_menu_input()
@@ -195,8 +238,8 @@ func _physics_process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		release_grab()
-		if not xr_enabled:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		if playing or pause_menu_open:
+			pause_requested.emit()
 		return
 	if not playing or xr_enabled:
 		return
@@ -282,7 +325,7 @@ func _poll_xr_menu_input() -> void:
 	xr_trigger_down = start_now
 
 	var controls_now := left_hand.is_button_pressed(&"primary_click")
-	if controls_now and not xr_skip_down:
+	if controls_now and not xr_skip_down and not pause_menu_open:
 		vr_menu.toggle_controls()
 		menu_controls_requested.emit()
 	xr_skip_down = controls_now
@@ -374,17 +417,24 @@ func _build_xr_rig() -> void:
 	wrist_label.text = "SANITY DRIFT"
 	left_hand.add_child(wrist_label)
 
-	xr_pointer = MeshInstance3D.new()
-	xr_pointer.name = "RemoteGrabRay"
+	xr_pointer = _create_controller_pointer("RemoteGrabRay")
+	right_hand.add_child(xr_pointer)
+	xr_anchor_pointer = _create_controller_pointer("AnchorRay")
+	left_hand.add_child(xr_anchor_pointer)
+
+
+func _create_controller_pointer(pointer_name: String) -> MeshInstance3D:
+	var pointer := MeshInstance3D.new()
+	pointer.name = pointer_name
 	var pointer_mesh := CylinderMesh.new()
 	pointer_mesh.top_radius = 0.006
 	pointer_mesh.bottom_radius = 0.006
 	pointer_mesh.height = 8.0
-	xr_pointer.mesh = pointer_mesh
-	xr_pointer.position = Vector3(0.0, 0.0, -4.0)
-	xr_pointer.rotation_degrees.x = 90.0
-	xr_pointer.material_override = GameColors.material(Color(0.55, 1.0, 0.93, 0.72), 3.0, true)
-	right_hand.add_child(xr_pointer)
+	pointer.mesh = pointer_mesh
+	pointer.position = Vector3(0.0, 0.0, -4.0)
+	pointer.rotation_degrees.x = 90.0
+	pointer.material_override = GameColors.material(Color(0.55, 1.0, 0.93, 0.72), 3.0, true)
+	return pointer
 
 
 func _build_vr_menu() -> void:
@@ -395,7 +445,9 @@ func _build_vr_menu() -> void:
 	vr_menu.start_requested.connect(func() -> void: menu_start_requested.emit())
 	vr_menu.tutorial_requested.connect(func() -> void: menu_tutorial_requested.emit())
 	vr_menu.main_menu_requested.connect(func() -> void: menu_main_requested.emit())
-	vr_menu.difficulty_changed.connect(func(hard: bool) -> void: menu_difficulty_changed.emit(hard))
+	vr_menu.resume_requested.connect(func() -> void: pause_resume_requested.emit())
+	vr_menu.restart_requested.connect(func() -> void: pause_restart_requested.emit())
+	vr_menu.quit_requested.connect(func() -> void: quit_requested.emit())
 	xr_camera.add_child(vr_menu)
 
 

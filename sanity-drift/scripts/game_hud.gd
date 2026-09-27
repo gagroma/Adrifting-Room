@@ -5,13 +5,16 @@ signal start_pressed
 signal tutorial_pressed
 signal restart_pressed
 signal menu_pressed
-signal difficulty_changed(hard: bool)
 signal calm_changed(enabled: bool)
+signal pause_resume_pressed
+signal pause_restart_pressed
+signal quit_pressed
 
 var ui_root: Control
 var title_panel: Control
 var controls_panel: Control
 var finish_panel: Control
+var pause_panel: Control
 var room_label: Label
 var phase_label: Label
 var timer_label: Label
@@ -24,24 +27,28 @@ var finish_stats: Label
 var finish_eyebrow: Label
 var finish_title: Label
 var finish_restart_button: Button
-var difficulty_button: Button
 var finish_menu_button: Button
 var guide_panel: PanelContainer
 var guide_label: Label
+var pause_resume_button: Button
+var pause_restart_button: Button
+var pause_menu_button: Button
+var pause_quit_button: Button
 var vignette_material: ShaderMaterial
 var transition_overlay: ColorRect
 var transition_material: ShaderMaterial
-var hard_mode := false
 
-var default_help := "MOUSE — look   LMB — grab   RMB — push\nI — anchor / recover   WHEEL — distance   P — skip drift\nK — guide hint   L — restart   O — comfort mode"
+var default_help := "MOUSE — look   LMB — grab   RMB — push\nI — anchor / recover   WHEEL — distance   P — skip drift\nESC — pause   K — guide hint   L — restart   O — comfort mode"
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 10
 	_build_hud()
 	_build_title_panel()
 	_build_controls_panel()
 	_build_finish_panel()
+	_build_pause_panel()
 	_build_transition_overlay()
 
 
@@ -49,6 +56,7 @@ func show_title() -> void:
 	title_panel.visible = true
 	controls_panel.visible = false
 	finish_panel.visible = false
+	pause_panel.visible = false
 	_set_game_hud_visible(false)
 
 
@@ -56,6 +64,7 @@ func show_game() -> void:
 	title_panel.visible = false
 	controls_panel.visible = false
 	finish_panel.visible = false
+	pause_panel.visible = false
 	_set_game_hud_visible(true)
 
 
@@ -63,6 +72,7 @@ func show_journey() -> void:
 	title_panel.visible = false
 	controls_panel.visible = false
 	finish_panel.visible = false
+	pause_panel.visible = false
 	_set_game_hud_visible(false)
 
 
@@ -71,6 +81,7 @@ func show_finish(stats_text: String) -> void:
 	title_panel.visible = false
 	controls_panel.visible = false
 	finish_panel.visible = true
+	pause_panel.visible = false
 	(finish_panel as ColorRect).color = Color(0.95, 0.93, 1.0, 0.96)
 	finish_eyebrow.text = "AWAKENING"
 	finish_eyebrow.add_theme_color_override("font_color", GameColors.DEPTH)
@@ -86,6 +97,7 @@ func show_game_over(room_name: String) -> void:
 	title_panel.visible = false
 	controls_panel.visible = false
 	finish_panel.visible = true
+	pause_panel.visible = false
 	(finish_panel as ColorRect).color = Color(0.12, 0.015, 0.025, 0.97)
 	finish_eyebrow.text = "FALSE MEMORY ACCEPTED"
 	finish_eyebrow.add_theme_color_override("font_color", GameColors.DANGER)
@@ -96,10 +108,12 @@ func show_game_over(room_name: String) -> void:
 	finish_restart_button.text = "RETRY ROOM"
 
 
-func set_hard_mode(value: bool) -> void:
-	hard_mode = value
-	if is_instance_valid(difficulty_button):
-		difficulty_button.text = "DIFFICULTY: HARD" if value else "DIFFICULTY: NORMAL"
+func show_pause() -> void:
+	title_panel.visible = false
+	controls_panel.visible = false
+	finish_panel.visible = false
+	pause_panel.visible = true
+	_set_game_hud_visible(false)
 
 
 func update_status(room_name: String, room_subtitle: String, phase_text: String, phase_color: Color, seconds: int, next_direction: String, active_plates: int, total_plates: int, anchors: int, calm_mode: bool) -> void:
@@ -284,13 +298,11 @@ func _build_title_panel() -> void:
 	tutorial.add_theme_font_size_override("font_size", 18)
 	tutorial.pressed.connect(func() -> void: tutorial_pressed.emit())
 	content.add_child(tutorial)
-	difficulty_button = Button.new()
-	difficulty_button.name = "DifficultyButton"
-	difficulty_button.text = "DIFFICULTY: NORMAL"
-	difficulty_button.custom_minimum_size = Vector2(300, 46)
-	difficulty_button.add_theme_font_size_override("font_size", 17)
-	difficulty_button.pressed.connect(_toggle_difficulty)
-	content.add_child(difficulty_button)
+	var campaign := _label(17, GameColors.PAD)
+	campaign.text = "6 LEVEL CAMPAIGN · NORMAL → HARD"
+	campaign.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	campaign.custom_minimum_size.y = 38
+	content.add_child(campaign)
 	var controls := Button.new()
 	controls.name = "VRControlsButton"
 	controls.text = "VR CONTROLS"
@@ -304,7 +316,7 @@ func _build_title_panel() -> void:
 	calm.toggled.connect(func(enabled: bool) -> void: calm_changed.emit(enabled))
 	content.add_child(calm)
 	var enter_hint := _label(14, Color(0.57, 0.56, 0.74))
-	enter_hint.text = "ENTER / RIGHT TRIGGER — start    LEFT STICK CLICK — VR controls"
+	enter_hint.text = "ENTER / RIGHT TRIGGER — start    LEFT ≡ BUTTON — pause in game"
 	enter_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(enter_hint)
 
@@ -362,6 +374,7 @@ func _build_controls_panel() -> void:
 func show_vr_controls() -> void:
 	title_panel.visible = false
 	finish_panel.visible = false
+	pause_panel.visible = false
 	controls_panel.visible = true
 	_set_game_hud_visible(false)
 
@@ -414,6 +427,51 @@ func _build_finish_panel() -> void:
 	content.add_child(finish_menu_button)
 
 
+func _build_pause_panel() -> void:
+	pause_panel = ColorRect.new()
+	pause_panel.name = "PausePanel"
+	pause_panel.color = Color(0.025, 0.02, 0.09, 0.975)
+	pause_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	pause_panel.visible = false
+	ui_root.add_child(pause_panel)
+	var content := VBoxContainer.new()
+	content.alignment = BoxContainer.ALIGNMENT_CENTER
+	content.add_theme_constant_override("separation", 14)
+	content.set_anchors_preset(Control.PRESET_CENTER)
+	content.position = Vector2(-300, -255)
+	content.size = Vector2(600, 510)
+	pause_panel.add_child(content)
+	var eyebrow := _label(16, GameColors.FLOAT)
+	eyebrow.text = "DREAM SUSPENDED"
+	eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	content.add_child(eyebrow)
+	var title := _label(64, Color.WHITE)
+	title.text = "PAUSED"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.custom_minimum_size.y = 88
+	content.add_child(title)
+	pause_resume_button = Button.new()
+	pause_resume_button.text = "CONTINUE"
+	pause_resume_button.custom_minimum_size = Vector2(320, 54)
+	pause_resume_button.pressed.connect(func() -> void: pause_resume_pressed.emit())
+	content.add_child(pause_resume_button)
+	pause_restart_button = Button.new()
+	pause_restart_button.text = "RESTART LEVEL"
+	pause_restart_button.custom_minimum_size = Vector2(320, 50)
+	pause_restart_button.pressed.connect(func() -> void: pause_restart_pressed.emit())
+	content.add_child(pause_restart_button)
+	pause_menu_button = Button.new()
+	pause_menu_button.text = "MAIN MENU"
+	pause_menu_button.custom_minimum_size = Vector2(320, 50)
+	pause_menu_button.pressed.connect(func() -> void: menu_pressed.emit())
+	content.add_child(pause_menu_button)
+	pause_quit_button = Button.new()
+	pause_quit_button.text = "EXIT GAME"
+	pause_quit_button.custom_minimum_size = Vector2(320, 50)
+	pause_quit_button.pressed.connect(func() -> void: quit_pressed.emit())
+	content.add_child(pause_quit_button)
+
+
 func _build_transition_overlay() -> void:
 	transition_overlay = ColorRect.new()
 	transition_overlay.name = "ConsciousnessTransition"
@@ -436,12 +494,6 @@ func _set_transition_progress(value: float) -> void:
 func _set_game_hud_visible(value: bool) -> void:
 	for control in [room_label, phase_label, timer_label, compass_label, progress_label, anchors_label, hint_label, calm_label]:
 		control.visible = value
-
-
-func _toggle_difficulty() -> void:
-	hard_mode = not hard_mode
-	set_hard_mode(hard_mode)
-	difficulty_changed.emit(hard_mode)
 
 
 func _label(font_size: int, color: Color) -> Label:

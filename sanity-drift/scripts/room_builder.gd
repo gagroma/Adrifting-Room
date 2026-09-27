@@ -41,7 +41,7 @@ func build_room(room_data: Dictionary) -> void:
 		_spawn_thought(thought_data["kind"], thought_data["position"])
 	for plate_data in room_data["pads"]:
 		_spawn_plate(plate_data)
-	if bool(room_data.get("simultaneous_plates", false)) and plates.size() == 2:
+	if bool(room_data.get("simultaneous_plates", false)) and plates.size() >= 2:
 		plate_link = LibraryPlateLink.new()
 		plate_link.name = "LibraryPlateLink"
 		add_child(plate_link)
@@ -167,6 +167,12 @@ func disintegrate_room(duration := 1.25) -> Tween:
 		var piece := child as Node3D
 		if piece.is_in_group("transition_fragments"):
 			continue
+		if piece is CollisionObject3D:
+			(piece as CollisionObject3D).collision_layer = 0
+			(piece as CollisionObject3D).collision_mask = 0
+			for piece_child in piece.get_children():
+				if piece_child is CollisionShape3D:
+					(piece_child as CollisionShape3D).set_deferred("disabled", true)
 		var outward := piece.position.normalized()
 		if outward.length_squared() < 0.05:
 			outward = Vector3(rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0)).normalized()
@@ -302,9 +308,9 @@ func _build_theme_geometry(theme: String, accent: Color) -> void:
 
 func _build_bedroom(accent: Color) -> void:
 	# A low bed, bedside table and moonlit window create a soft horizontal room.
-	_add_decor_box(Vector3(-3.7, -4.48, 0.6), Vector3(3.2, 0.42, 4.4), GameColors.DEPTH.lightened(0.12))
-	_add_decor_box(Vector3(-3.7, -4.18, 0.6), Vector3(2.9, 0.34, 4.0), GameColors.MIST.darkened(0.08), 0.16)
-	_add_decor_box(Vector3(-3.7, -2.85, -1.35), Vector3(3.25, 2.4, 0.24), GameColors.DEPTH.lightened(0.20))
+	_add_decor_box(Vector3(-3.7, -4.48, -3.35), Vector3(3.2, 0.42, 4.4), GameColors.DEPTH.lightened(0.12))
+	_add_decor_box(Vector3(-3.7, -4.18, -3.35), Vector3(2.9, 0.34, 4.0), GameColors.MIST.darkened(0.08), 0.16)
+	_add_decor_box(Vector3(-3.7, -2.85, -5.48), Vector3(3.25, 2.4, 0.24), GameColors.DEPTH.lightened(0.20))
 	_add_decor_box(Vector3(3.7, -4.25, 1.5), Vector3(1.25, 1.3, 1.25), GameColors.DEPTH.lightened(0.18))
 	_add_decor_cylinder(Vector3(3.7, -3.2, 1.5), 0.12, 1.0, accent, 1.4)
 	_add_decor_sphere(Vector3(3.7, -2.55, 1.5), 0.48, Color("ffdba0"), 2.8)
@@ -356,41 +362,72 @@ func _build_library(accent: Color) -> void:
 
 
 func _add_decor_box(box_position: Vector3, size: Vector3, color: Color, emission := 0.0, transparent := false) -> void:
+	var body := StaticBody3D.new()
+	body.position = box_position
+	body.collision_layer = 1
+	body.collision_mask = 2
 	var visual := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
 	mesh.size = size
 	visual.mesh = mesh
-	visual.position = box_position
 	visual.material_override = GameColors.material(color, emission, transparent)
-	add_child(visual)
+	body.add_child(visual)
+	# The shell already owns the floor collision. Every raised decoration gets
+	# its own collider so drifting thoughts cannot pass through furniture.
+	if box_position.y > -4.8:
+		var collision := CollisionShape3D.new()
+		var shape := BoxShape3D.new()
+		shape.size = size
+		collision.shape = shape
+		body.add_child(collision)
+	add_child(body)
 	# Floor tiles stay still; only theme furniture participates in the tremble.
 	if box_position.y > -4.8:
-		shift_furniture.append(visual)
+		shift_furniture.append(body)
 
 
 func _add_decor_sphere(sphere_position: Vector3, radius: float, color: Color, emission := 0.0) -> void:
+	var body := StaticBody3D.new()
+	body.position = sphere_position
+	body.collision_layer = 1
+	body.collision_mask = 2
 	var visual := MeshInstance3D.new()
 	var mesh := SphereMesh.new()
 	mesh.radius = radius
 	mesh.height = radius * 2.0
 	visual.mesh = mesh
-	visual.position = sphere_position
 	visual.material_override = GameColors.material(color, emission)
-	add_child(visual)
-	shift_furniture.append(visual)
+	body.add_child(visual)
+	var collision := CollisionShape3D.new()
+	var shape := SphereShape3D.new()
+	shape.radius = radius
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+	shift_furniture.append(body)
 
 
 func _add_decor_cylinder(cylinder_position: Vector3, radius: float, height: float, color: Color, emission := 0.0) -> void:
+	var body := StaticBody3D.new()
+	body.position = cylinder_position
+	body.collision_layer = 1
+	body.collision_mask = 2
 	var visual := MeshInstance3D.new()
 	var mesh := CylinderMesh.new()
 	mesh.top_radius = radius
 	mesh.bottom_radius = radius
 	mesh.height = height
 	visual.mesh = mesh
-	visual.position = cylinder_position
 	visual.material_override = GameColors.material(color, emission)
-	add_child(visual)
-	shift_furniture.append(visual)
+	body.add_child(visual)
+	var collision := CollisionShape3D.new()
+	var shape := CylinderShape3D.new()
+	shape.radius = radius
+	shape.height = height
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+	shift_furniture.append(body)
 
 
 func _add_wall(wall_position: Vector3, size: Vector3, color: Color) -> void:
