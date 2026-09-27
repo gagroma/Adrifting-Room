@@ -69,6 +69,13 @@ func release_all_anchors() -> void:
 		thought.release_anchor()
 
 
+func can_anchor_on_active_plate(thought: ThoughtProp, current_gravity: Vector3) -> bool:
+	for plate in plates:
+		if plate.can_anchor_thought(thought, current_gravity):
+			return true
+	return false
+
+
 func all_plates_active() -> bool:
 	for plate in plates:
 		if not plate.latched:

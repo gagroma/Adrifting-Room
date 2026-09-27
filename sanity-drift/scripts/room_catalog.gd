@@ -156,12 +156,19 @@ static func all_rooms() -> Array[Dictionary]:
 		{
 			"name": "LIBRARY",
 			"theme": "library",
-			"subtitle": "Save one thought for the next fall",
-			"objective": "Light plates I then II. Anchor one thought between falls and reject false memories.",
+			"subtitle": "Keep two memories in place at once",
+			"objective": "During RIGHT, hold Memory on I and anchor it. During DOWN, land the other Memory on II while I stays held.",
 			"accent": GameColors.DANGER,
 			"drift": 26.0,
 			"anchors": 1,
-			"sequence": [Vector3.RIGHT, Vector3.DOWN, Vector3.FORWARD],
+			"reusable_anchor": true,
+			"simultaneous_plates": true,
+			"sequence": [Vector3.RIGHT, Vector3.DOWN],
+			"guide_lines": [
+				"These two plates are live sensors. A plate goes dark as soon as its Memory is no longer held there.",
+				"During the RIGHT fall, settle a Memory on plate I, then anchor it before the shift ends.",
+				"During the DOWN fall, land the other Memory on plate II. Both plates must glow together. Grab the anchored Memory to recover the anchor."
+			],
 			"props": [
 				{"kind": "memory", "position": Vector3(-1.8, 1.6, -1.0)},
 				{"kind": "memory", "position": Vector3(1.2, 1.9, 1.5)},
@@ -169,8 +176,8 @@ static func all_rooms() -> Array[Dictionary]:
 				{"kind": "anxiety", "position": Vector3(0.0, -0.5, -1.5)}
 			],
 			"pads": [
-				{"direction": Vector3.RIGHT, "u": -1.4, "v": -1.0, "threshold": 6.0, "label": "I"},
-				{"direction": Vector3.DOWN, "u": -1.5, "v": 1.5, "threshold": 6.0, "label": "II"}
+				{"direction": Vector3.RIGHT, "u": -1.4, "v": -1.0, "threshold": 6.0, "continuous_contact": true, "label": "I"},
+				{"direction": Vector3.DOWN, "u": -1.5, "v": 1.5, "threshold": 6.0, "continuous_contact": true, "label": "II"}
 			]
 		}
 	]

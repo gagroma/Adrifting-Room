@@ -35,7 +35,7 @@ you replay the campaign or return to the main menu.
 - right trigger on the robot — give the guide a playful bump
 - right grip — push the highlighted thought
 - right thumbstick or Vive trackpad up/down — change grab distance
-- left trigger or grip — anchor the highlighted thought until the next fall
+- left trigger or grip — anchor the highlighted thought; in the Library, grab it again to recover the reusable anchor
 - left thumbstick/Vive trackpad click or `X` — end the Drift phase early
 - left wrist display — timer, next gravity direction, plates, and anchors
 
@@ -46,7 +46,7 @@ you replay the campaign or return to the main menu.
 - `RMB` — push the highlighted thought
 - `Mouse` — look around
 - `Wheel` — move a held thought closer or farther away
-- `I` — anchor a thought until the next fall
+- `I` — anchor a thought; in the Library, grab it again to recover the reusable anchor
 - `P` — end the Drift phase early
 - `O` — comfort mode
 - `K` — ask the robot guide to repeat the room objective

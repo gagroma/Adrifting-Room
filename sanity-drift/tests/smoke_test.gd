@@ -145,14 +145,26 @@ func _run() -> void:
 	await process_frame
 	_check(int(game.get("anchors_left")) == 1, "library grants one anchor")
 	_check(builder.plates.size() == 2, "library has a two-step puzzle")
-	_check("Anchor one thought" in player.vr_objective.objective_label.text, "VR puzzle panel updates for the library")
+	_check("During RIGHT" in player.vr_objective.objective_label.text, "VR puzzle panel explains the two-phase library puzzle")
 	_check(guide.visible and guide.room_number == 2, "guide follows into the library")
+	_check((game.get("current_room_data")["sequence"] as Array).size() == 2, "library uses a two-fall sequence")
 	var library_body := builder.thoughts[0]
+	var library_plate := builder.plates[0]
+	for thought in builder.thoughts:
+		thought.global_position = Vector3.ZERO
+	library_body.global_position = library_plate.global_position - library_plate.gravity_direction * 0.62
+	game.set("current_gravity", Vector3.RIGHT)
+	library_plate.update_contact(0.3, Vector3.RIGHT, builder.thoughts)
+	_check(library_plate.latched, "plate I activates during the RIGHT fall")
 	game.call("_on_anchor_requested", library_body)
 	_check(library_body.freeze and library_body.anchored, "anchor freezes a thought")
-	_check(int(game.get("anchors_left")) == 0, "anchor is consumed")
+	_check(int(game.get("anchors_left")) == 0, "deployed reusable anchor leaves the inventory")
 	game.call("_finish_fall")
-	_check(not library_body.freeze and not library_body.anchored, "anchor releases after the next fall")
+	library_plate.update_contact(0.01, Vector3.ZERO, builder.thoughts)
+	_check(library_body.freeze and library_body.anchored and library_plate.latched, "library anchor holds plate I between falls")
+	player.call("_begin_grab", {"collider": library_body}, player.desktop_camera.global_position)
+	_check(not library_body.anchored and int(game.get("anchors_left")) == 1, "grabbing the anchored thought recovers the reusable anchor")
+	player.release_grab()
 
 	hud.show_title()
 	hud.show_vr_controls()
@@ -174,7 +186,7 @@ func _run() -> void:
 	_check(rooms[0]["theme"] == "bedroom", "first room uses the bedroom theme")
 	_check(rooms[1]["theme"] == "kitchen", "second room uses the kitchen theme")
 	_check(rooms[2]["theme"] == "library", "third room uses the library theme")
-	_check((rooms[2]["sequence"] as Array).size() == 3, "library gravity sequence exists")
+	_check((rooms[2]["sequence"] as Array).size() == 2, "library has exactly RIGHT and DOWN gravity phases")
 	var journey := ConsciousnessJourney.new()
 	root.add_child(journey)
 	await process_frame

@@ -1,0 +1,85 @@
+extends SceneTree
+
+var failures: Array[String] = []
+
+
+func _initialize() -> void:
+	call_deferred("_run")
+
+
+func _check(condition: bool, message: String) -> void:
+	if not condition:
+		failures.append(message)
+
+
+func _run() -> void:
+	var packed := load("res://main.tscn") as PackedScene
+	var game := packed.instantiate()
+	game.set("audio_enabled", false)
+	root.add_child(game)
+	await process_frame
+	game.call("_start_game")
+	game.call("_load_room", 2)
+	await process_frame
+
+	var builder := game.get("room_builder") as RoomBuilder
+	var player := game.get("player") as PlayerController
+	var room := game.get("current_room_data") as Dictionary
+	var memories := builder.thoughts.filter(func(thought: ThoughtProp) -> bool: return thought.thought_kind == "memory")
+	var first_memory := memories[0] as ThoughtProp
+	var second_memory := memories[1] as ThoughtProp
+	var plate_i := builder.plates[0]
+	var plate_ii := builder.plates[1]
+
+	_check(bool(room.get("simultaneous_plates", false)), "library requires simultaneous plate contact")
+	_check(bool(room.get("reusable_anchor", false)), "library uses a reusable anchor")
+	_check((room["sequence"] as Array) == [Vector3.RIGHT, Vector3.DOWN], "library sequence is RIGHT then DOWN")
+	_check(plate_i.continuous_contact and plate_ii.continuous_contact, "both library plates continuously check their contents")
+
+	for thought in builder.thoughts:
+		thought.global_position = Vector3.ZERO
+	first_memory.global_position = plate_i.global_position - Vector3.RIGHT * 0.62
+	game.call("_on_anchor_requested", first_memory)
+	_check(not first_memory.anchored, "anchor cannot be deployed before plate I lights")
+	plate_i.update_contact(0.3, Vector3.DOWN, builder.thoughts)
+	_check(not plate_i.latched, "plate I cannot activate during the wrong gravity shift")
+
+	game.set("current_gravity", Vector3.RIGHT)
+	plate_i.update_contact(0.3, Vector3.RIGHT, builder.thoughts)
+	_check(plate_i.latched, "plate I activates during RIGHT")
+	game.call("_on_anchor_requested", first_memory)
+	_check(first_memory.anchored and int(game.get("anchors_left")) == 0, "lit plate I allows the anchor to deploy")
+	game.call("_finish_fall")
+	plate_i.update_contact(0.01, Vector3.ZERO, builder.thoughts)
+	_check(plate_i.latched, "anchored Memory keeps plate I active between falls")
+
+	player.call("_begin_grab", {"collider": first_memory}, player.desktop_camera.global_position)
+	plate_i.update_contact(0.01, Vector3.ZERO, builder.thoughts)
+	_check(not first_memory.anchored and int(game.get("anchors_left")) == 1, "grabbing recovers the reusable anchor")
+	_check(not plate_i.latched, "plate I switches off when its unanchored Memory is no longer held by matching gravity")
+	player.release_grab()
+
+	game.set("current_gravity", Vector3.RIGHT)
+	plate_i.update_contact(0.3, Vector3.RIGHT, builder.thoughts)
+	game.call("_on_anchor_requested", first_memory)
+	game.set("current_gravity", Vector3.DOWN)
+	second_memory.global_position = plate_ii.global_position - Vector3.DOWN * 0.62
+	builder.update_plates(0.3, Vector3.DOWN)
+	_check(plate_i.latched and plate_ii.latched, "anchored plate I and occupied plate II are active together")
+	_check(builder.all_plates_active(), "both live plate checks pass simultaneously")
+
+	game.call("_physics_process", 0.01)
+	_check(bool(game.get("room_transitioning")), "simultaneous contact completes the library immediately")
+	game.queue_free()
+	await process_frame
+	_finish()
+
+
+func _finish() -> void:
+	if failures.is_empty():
+		print("SANITY_DRIFT_LIBRARY_PUZZLE_TEST: PASS")
+		quit(0)
+		return
+	for failure in failures:
+		push_error("SANITY_DRIFT_LIBRARY_PUZZLE_TEST: " + failure)
+	quit(1)

@@ -22,6 +22,7 @@ var audio_enabled := true
 var hard_mode := false
 var tutorial_room: Dictionary = {}
 var current_room_data: Dictionary = {}
+var active_anchor: ThoughtProp
 var tutorial_step := 0
 var tutorial_push_thought: ThoughtProp
 var tutorial_push_origin := Vector3.ZERO
@@ -194,6 +195,7 @@ func _restart_room() -> void:
 func _load_tutorial() -> void:
 	room_transitioning = false
 	player.release_grab()
+	active_anchor = null
 	player.set_vr_objective_visible(true)
 	hud.show_game()
 	sequence_step = 0
@@ -219,6 +221,7 @@ func _load_room(index: int, keep_transition := false) -> void:
 	room_index = index
 	room_transitioning = keep_transition
 	player.release_grab()
+	active_anchor = null
 	player.set_vr_objective_visible(true)
 	hud.show_game()
 	sequence_step = 0
@@ -267,7 +270,8 @@ func _finish_fall() -> void:
 	phase_time_left = 1.15
 	current_gravity = Vector3.ZERO
 	sequence_step += 1
-	room_builder.release_all_anchors()
+	if not _uses_reusable_anchor():
+		room_builder.release_all_anchors()
 	_update_status()
 
 
@@ -317,6 +321,8 @@ func _physics_process(delta: float) -> void:
 	if phase == Phase.FALLING:
 		room_builder.apply_gravity(current_gravity, player.grabbed_thought)
 	room_builder.update_plates(delta, current_gravity)
+	if bool(_active_room().get("simultaneous_plates", false)) and room_builder.all_plates_active():
+		_complete_room()
 
 
 func _complete_room() -> void:
@@ -440,14 +446,23 @@ func _on_plate_activated(index: int) -> void:
 
 
 func _on_anchor_requested(thought: ThoughtProp) -> void:
-	if anchors_left <= 0:
+	if not is_instance_valid(thought):
+		return
+	if _uses_reusable_anchor() and thought == active_anchor and thought.anchored:
+		_recover_active_anchor(thought)
+		return
+	if anchors_left <= 0 or thought.anchored:
 		audio.play_tone(95.0, 0.10, -18.0)
 		return
-	if not is_instance_valid(thought) or thought.anchored:
+	if _uses_reusable_anchor() and not room_builder.can_anchor_on_active_plate(thought, current_gravity):
+		audio.play_tone(95.0, 0.10, -18.0)
+		guide.say_now("A live plate must light before its Memory can be anchored.", "no", 4.0)
 		return
 	if thought == player.grabbed_thought:
 		player.release_grab()
 	thought.set_anchor(true)
+	if _uses_reusable_anchor():
+		active_anchor = thought
 	if game_state == GameState.TUTORIAL:
 		tutorial_anchor_seen = true
 	anchors_left -= 1
@@ -562,9 +577,24 @@ func _set_tutorial_step(step: int) -> void:
 
 
 func _on_thought_grabbed(thought: ThoughtProp) -> void:
+	if _uses_reusable_anchor() and thought == active_anchor:
+		_recover_active_anchor(thought)
 	if game_state == GameState.TUTORIAL and tutorial_step == 0 and not thought.is_false_memory():
 		_set_tutorial_step(1)
 		guide.say_now("Great! The thought follows your hand or gaze. Change its distance with the right stick or mouse wheel.", "thumbsup", 6.0)
+
+
+func _recover_active_anchor(thought: ThoughtProp) -> void:
+	if is_instance_valid(thought) and thought.anchored:
+		thought.set_anchor(false)
+	active_anchor = null
+	anchors_left = int(_active_room().get("anchors", 0))
+	audio.play_tone(510.0, 0.2, -12.0)
+	_update_status()
+
+
+func _uses_reusable_anchor() -> bool:
+	return bool(_active_room().get("reusable_anchor", false))
 
 
 func _on_grab_distance_changed(_distance: float) -> void:

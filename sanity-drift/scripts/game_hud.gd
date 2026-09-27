@@ -33,7 +33,7 @@ var transition_overlay: ColorRect
 var transition_material: ShaderMaterial
 var hard_mode := false
 
-var default_help := "MOUSE — look   LMB — grab   RMB — push\nI — anchor   WHEEL — distance   P — skip drift\nK — guide hint   L — restart   O — comfort mode"
+var default_help := "MOUSE — look   LMB — grab   RMB — push\nI — anchor / recover   WHEEL — distance   P — skip drift\nK — guide hint   L — restart   O — comfort mode"
 
 
 func _ready() -> void:
@@ -340,7 +340,7 @@ func _build_controls_panel() -> void:
 	content.add_child(intro)
 
 	var guide := _label(19, Color(0.94, 0.93, 1.0))
-	guide.text = "RIGHT HAND\nTrigger — remote grab · release — throw\nPoint at robot + trigger — playful bump\nGrip — push the highlighted thought\nThumbstick / trackpad up or down — change grab distance\n\nLEFT HAND\nTrigger or grip — anchor a thought until the next fall\nThumbstick / trackpad click or X — end the Drift phase early\nWrist display — timer, next gravity, plates and anchors"
+	guide.text = "RIGHT HAND\nTrigger — remote grab · release — throw\nPoint at robot + trigger — playful bump\nGrip — push the highlighted thought\nThumbstick / trackpad up or down — change grab distance\n\nLEFT HAND\nTrigger or grip — anchor or recover a highlighted thought\nThumbstick / trackpad click or X — end the Drift phase early\nWrist display — timer, next gravity, plates and anchors"
 	guide.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	guide.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	guide.custom_minimum_size = Vector2(680, 300)
