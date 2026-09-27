@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://veo3xwl308mv"
+path="res://.godot/imported/yeahhhhh yuh.wav-d9dd713e87096daf5baa8f7db17ea60f.sample"
+
+[deps]
+
+source_file="res://sfx/soundtrack/yeahhhhh yuh.wav"
+dest_files=["res://.godot/imported/yeahhhhh yuh.wav-d9dd713e87096daf5baa8f7db17ea60f.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
