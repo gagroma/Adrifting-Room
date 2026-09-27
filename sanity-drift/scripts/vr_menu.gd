@@ -20,6 +20,9 @@ var controls_button: Button
 var back_button: Button
 var replay_button: Button
 var finish_menu_button: Button
+var finish_eyebrow: Label
+var finish_title: Label
+var finish_subtitle: Label
 var cursor: ColorRect
 var hovered_button: Button
 var hard_mode := false
@@ -101,10 +104,22 @@ func show_controls_page() -> void:
 	_clear_hover()
 
 
-func show_finish_page() -> void:
+func show_finish_page(loss := false) -> void:
 	start_page.visible = false
 	controls_page.visible = false
 	finish_page.visible = true
+	if loss:
+		finish_eyebrow.text = "FALSE MEMORY ACCEPTED"
+		finish_eyebrow.add_theme_color_override("font_color", GameColors.DANGER)
+		finish_title.text = "THE DREAM\nCOLLAPSED"
+		finish_subtitle.text = "The room was destroyed · pull the flashing memory away within 5 seconds"
+		replay_button.text = "RETRY ROOM"
+	else:
+		finish_eyebrow.text = "AWAKENING"
+		finish_eyebrow.add_theme_color_override("font_color", GameColors.FLOAT)
+		finish_title.text = "YOUR THOUGHTS\nARE IN PLACE"
+		finish_subtitle.text = "All dream layers complete"
+		replay_button.text = "DREAM AGAIN"
 	_clear_hover()
 
 
@@ -233,20 +248,21 @@ func _build_controls_page() -> void:
 
 
 func _build_finish_page() -> void:
-	var eyebrow := _label("AWAKENING", 24, GameColors.FLOAT)
-	eyebrow.position = Vector2(100, 82)
-	eyebrow.size = Vector2(800, 42)
-	finish_page.add_child(eyebrow)
+	finish_eyebrow = _label("AWAKENING", 24, GameColors.FLOAT)
+	finish_eyebrow.position = Vector2(100, 82)
+	finish_eyebrow.size = Vector2(800, 42)
+	finish_page.add_child(finish_eyebrow)
 
-	var title := _label("YOUR THOUGHTS\nARE IN PLACE", 62, Color.WHITE)
-	title.position = Vector2(100, 132)
-	title.size = Vector2(800, 180)
-	finish_page.add_child(title)
+	finish_title = _label("YOUR THOUGHTS\nARE IN PLACE", 62, Color.WHITE)
+	finish_title.position = Vector2(100, 132)
+	finish_title.size = Vector2(800, 180)
+	finish_page.add_child(finish_title)
 
-	var subtitle := _label("All dream layers complete", 27, Color("cac6ec"))
-	subtitle.position = Vector2(100, 322)
-	subtitle.size = Vector2(800, 42)
-	finish_page.add_child(subtitle)
+	finish_subtitle = _label("All dream layers complete", 27, Color("cac6ec"))
+	finish_subtitle.position = Vector2(80, 315)
+	finish_subtitle.size = Vector2(840, 66)
+	finish_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	finish_page.add_child(finish_subtitle)
 
 	replay_button = _button("DREAM AGAIN", Vector2(190, 400), Vector2(620, 82))
 	finish_page.add_child(replay_button)

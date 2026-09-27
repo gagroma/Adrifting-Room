@@ -122,7 +122,17 @@ func show_vr_menu() -> void:
 func show_vr_finish_menu() -> void:
 	if is_instance_valid(vr_menu):
 		vr_menu.visible = true
-		vr_menu.show_finish_page()
+		vr_menu.show_finish_page(false)
+	if is_instance_valid(wrist_label):
+		wrist_label.visible = false
+	if is_instance_valid(xr_pointer):
+		xr_pointer.visible = false
+
+
+func show_vr_game_over() -> void:
+	if is_instance_valid(vr_menu):
+		vr_menu.visible = true
+		vr_menu.show_finish_page(true)
 	if is_instance_valid(wrist_label):
 		wrist_label.visible = false
 	if is_instance_valid(xr_pointer):

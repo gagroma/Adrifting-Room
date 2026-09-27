@@ -2,6 +2,7 @@ class_name RoomBuilder
 extends Node3D
 
 signal plate_activated(index: int)
+signal false_thought_accepted(thought: ThoughtProp, plate: PressurePad)
 
 const ROOM_HALF := Vector3(6.0, 5.0, 6.0)
 
@@ -122,6 +123,37 @@ func disintegrate_room(duration := 1.25) -> Tween:
 	return tween
 
 
+func explode_room(origin: Vector3, duration := 1.35) -> Tween:
+	var blast := MeshInstance3D.new()
+	blast.name = "FalseMemoryBlast"
+	blast.add_to_group("transition_fragments")
+	var blast_mesh := SphereMesh.new()
+	blast_mesh.radius = 0.34
+	blast_mesh.height = 0.68
+	blast.mesh = blast_mesh
+	blast.position = to_local(origin)
+	var blast_material := GameColors.material(Color(1.0, 0.08, 0.04, 0.88), 12.0, true)
+	blast.material_override = blast_material
+	add_child(blast)
+
+	var flash := OmniLight3D.new()
+	flash.name = "ExplosionLight"
+	flash.add_to_group("transition_fragments")
+	flash.position = to_local(origin)
+	flash.light_color = Color("ff351f")
+	flash.light_energy = 18.0
+	flash.omni_range = 14.0
+	add_child(flash)
+
+	var blast_tween := create_tween()
+	blast_tween.set_parallel(true)
+	blast_tween.tween_property(blast, "scale", Vector3.ONE * 34.0, duration).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	blast_tween.tween_property(blast_material, "albedo_color:a", 0.0, duration)
+	blast_tween.tween_property(flash, "light_energy", 0.0, duration * 0.72)
+	disintegrate_room(duration)
+	return blast_tween
+
+
 func show_awakening_message() -> void:
 	var message := Label3D.new()
 	message.text = "AWAKENING\nEvery thought is in place"
@@ -156,12 +188,17 @@ func _spawn_plate(data: Dictionary) -> void:
 	plate.configure(data, ROOM_HALF)
 	var plate_index := plates.size()
 	plate.activated.connect(_on_plate_activated.bind(plate_index))
+	plate.false_thought_accepted.connect(_on_false_thought_accepted)
 	add_child(plate)
 	plates.append(plate)
 
 
 func _on_plate_activated(_plate: PressurePad, index: int) -> void:
 	plate_activated.emit(index)
+
+
+func _on_false_thought_accepted(thought: ThoughtProp, plate: PressurePad) -> void:
+	false_thought_accepted.emit(thought, plate)
 
 
 func _build_shell(accent: Color) -> void:

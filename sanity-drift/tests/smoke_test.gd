@@ -38,7 +38,8 @@ func _run() -> void:
 	_check(not player.vr_menu.visible, "interactive VR start menu hides after play")
 	_check(player.vr_objective.visible, "VR puzzle panel appears after play")
 	_check("8 kg" in player.vr_objective.objective_label.text, "VR puzzle panel explains the bedroom objective")
-	_check(builder.thoughts.size() == 1, "bedroom has one thought")
+	_check(builder.thoughts.size() == 2, "bedroom has a true and a false memory")
+	_check(builder.thoughts.any(func(thought: ThoughtProp) -> bool: return thought.is_false_memory()), "bedroom contains an unstable false memory")
 	_check(builder.plates.size() == 1, "bedroom has one plate")
 	_check(builder.thoughts[0] is ThoughtProp, "thought uses its own component")
 	_check(builder.plates[0] is PressurePad, "plate uses its own component")
@@ -123,7 +124,7 @@ func _run() -> void:
 
 	game.call("_load_room", 1)
 	await process_frame
-	_check(builder.thoughts.size() == 3, "kitchen has three thought types")
+	_check(builder.thoughts.size() == 4, "kitchen has three thought types plus a false memory")
 	_check(builder.plates.size() == 2, "kitchen has two plates")
 	_check("heavy thought" in player.vr_objective.objective_label.text, "VR puzzle panel updates for the kitchen")
 	_check(guide.visible and guide.room_number == 1, "guide follows into the kitchen")
@@ -174,7 +175,7 @@ func _run() -> void:
 	await create_timer(6.35).timeout
 	_check(int(game.get("room_index")) == 1, "full transition advances to the kitchen")
 	_check(not bool(game.get("room_transitioning")), "full transition returns control to the player")
-	_check(builder.thoughts.size() == 3, "the new room is playable after thought-space flight")
+	_check(builder.thoughts.size() == 4, "the new room is playable after thought-space flight")
 	game.queue_free()
 	await process_frame
 	_finish()

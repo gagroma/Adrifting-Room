@@ -39,7 +39,7 @@ The remaining code constructs the room, interface, and gameplay loop automatical
 
 ## Adding a thought type
 
-Add a branch to `match thought_kind` in `scripts/thought_prop.gd`. That branch defines its shape, mass, material, collider, and special behavior. The new `kind` can then be used by any room.
+Add a branch to `match thought_kind` in `scripts/thought_prop.gd`. That branch defines its shape, mass, material, collider, and special behavior. The new `kind` can then be used by any room. `false_memory` is visually identical to a normal Memory until its hazardous behavior begins: `pressure_pad.gd` owns its five-second acceptance countdown, the prop owns the red warning pulse, and `main.gd` handles the explosion and defeat flow.
 
 ## Changing controls
 
@@ -68,4 +68,4 @@ changes to `main.gd`, which advances the live objective and the robot's lesson.
 
 ## Verification
 
-`tests/smoke_test.gd` checks scene loading, VR components, the title-screen controls guide, mouse grab, pressure plates, all three visual themes, the between-room flight, anchors, and the complete bedroom-to-kitchen transition. `tests/tutorial_test.gd` checks the tutorial button, every guided interaction, anchor release, completion, and return to the title menu. `tests/menu_finish_test.gd` checks difficulty selection and the desktop/VR final screens.
+`tests/smoke_test.gd` checks scene loading, VR components, the title-screen controls guide, mouse grab, pressure plates, all three visual themes, the between-room flight, anchors, and the complete bedroom-to-kitchen transition. `tests/tutorial_test.gd` checks the tutorial button, every guided interaction, anchor release, completion, and return to the title menu. `tests/menu_finish_test.gd` checks difficulty selection and the desktop/VR final screens. `tests/false_memory_test.gd` checks the five-second warning, cancellation after pulling the fake away, room destruction, defeat screens, and retry flow.

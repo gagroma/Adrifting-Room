@@ -33,21 +33,21 @@ func _run() -> void:
 	var configured_room: Dictionary = game.get("current_room_data")
 	_check(is_equal_approx(float(configured_room["drift"]), 11.7), "hard mode shortens the new puzzle's Drift phase")
 	_check(configured_room["name"] == "FRACTURED BEDROOM", "hard mode loads a new bedroom puzzle")
-	_check(builder.plates.size() == 3 and builder.thoughts.size() == 3, "hard bedroom has three plates and three thoughts")
+	_check(builder.plates.size() == 3 and builder.thoughts.size() == 4, "hard bedroom has three plates and an added false memory")
 	_check((configured_room["sequence"] as Array).size() == 3, "hard bedroom has a three-direction sequence")
 
 	game.call("_load_room", 1)
 	await process_frame
 	configured_room = game.get("current_room_data")
 	_check(configured_room["name"] == "CROSSED KITCHEN", "hard mode loads a new kitchen puzzle")
-	_check(builder.plates.size() == 4 and builder.thoughts.size() == 5, "hard kitchen has four plates and five thoughts")
+	_check(builder.plates.size() == 4 and builder.thoughts.size() == 7, "hard kitchen has four plates and two false memories")
 	_check((configured_room["sequence"] as Array).size() == 4, "hard kitchen has a four-direction sequence")
 
 	game.call("_load_room", 2)
 	await process_frame
 	configured_room = game.get("current_room_data")
 	_check(configured_room["name"] == "INFINITE LIBRARY", "hard mode loads a new library puzzle")
-	_check(builder.plates.size() == 5 and builder.thoughts.size() == 5, "hard library has five plates and five thoughts")
+	_check(builder.plates.size() == 5 and builder.thoughts.size() == 7, "hard library has five plates and two false memories")
 	_check((configured_room["sequence"] as Array).size() == 5 and int(game.get("anchors_left")) == 2, "hard library has five gravity directions and two anchors")
 	var memory := builder.thoughts[0]
 	var test_thoughts: Array[ThoughtProp] = [memory]

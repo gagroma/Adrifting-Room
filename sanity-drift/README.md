@@ -20,6 +20,9 @@ Use `play_sanity_drift_desktop.cmd` to test without a headset.
 The title screen includes a `TUTORIAL` button for an interactive training room
 and a `VR CONTROLS` button with the complete in-game guide. In the tutorial, the
 same robot from the main dream waits for each action before explaining the next.
+The robot also introduces False Memories that look identical to real ones. Their
+only tell is flashing red for five seconds after touching an active plate. Pull it away before the countdown ends or it
+detonates, destroys the room, and opens the retry/main-menu defeat screen.
 Choose `NORMAL` or `HARD` before entering the dream. Hard mode replaces all
 three puzzles with new layouts containing three, four, and five plates, longer
 gravity sequences, more thoughts, and extra anchor decisions. It also shortens

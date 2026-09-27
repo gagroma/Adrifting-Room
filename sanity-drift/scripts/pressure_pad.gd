@@ -2,12 +2,18 @@ class_name PressurePad
 extends Node3D
 
 signal activated(pad: PressurePad)
+signal false_thought_accepted(thought: ThoughtProp, pad: PressurePad)
+
+const FALSE_ACCEPT_SECONDS := 5.0
 
 var gravity_direction := Vector3.DOWN
 var required_mass := 1.0
 var plate_size := Vector2(2.25, 2.25)
 var latched := false
 var dwell_time := 0.0
+var danger_thought: ThoughtProp
+var danger_time_left := 0.0
+var danger_triggered := false
 
 var plate_material: StandardMaterial3D
 var plate_label: Label3D
@@ -21,6 +27,22 @@ func configure(data: Dictionary, room_half: Vector3) -> void:
 
 
 func update_contact(delta: float, current_gravity: Vector3, thoughts: Array[ThoughtProp]) -> void:
+	if is_instance_valid(danger_thought):
+		if _contains_thought(danger_thought):
+			danger_time_left = maxf(danger_time_left - delta, 0.0)
+			danger_thought.update_false_warning(danger_time_left)
+			plate_label.text = "DANGER %d" % maxi(1, int(ceil(danger_time_left)))
+			if danger_time_left <= 0.0 and not danger_triggered:
+				danger_triggered = true
+				plate_label.text = "FALSE MEMORY"
+				false_thought_accepted.emit(danger_thought, self)
+			return
+		danger_thought.cancel_false_warning()
+		danger_thought = null
+		danger_time_left = 0.0
+		danger_triggered = false
+		plate_label.text = str(get_meta("base_label", "PLATE"))
+
 	if latched:
 		return
 	if gravity_direction.dot(current_gravity) < 0.98:
@@ -31,10 +53,14 @@ func update_contact(delta: float, current_gravity: Vector3, thoughts: Array[Thou
 	for thought in thoughts:
 		if not is_instance_valid(thought):
 			continue
-		var offset := thought.global_position - global_position
-		var distance := offset.dot(-gravity_direction)
-		var axes := _surface_axes()
-		if distance >= 0.0 and distance <= 1.25 and absf(offset.dot(axes[0])) <= plate_size.x * 0.52 and absf(offset.dot(axes[1])) <= plate_size.y * 0.52:
+		if _contains_thought(thought):
+			if thought.is_false_memory():
+				danger_thought = thought
+				danger_time_left = FALSE_ACCEPT_SECONDS
+				danger_triggered = false
+				thought.start_false_warning(FALSE_ACCEPT_SECONDS)
+				plate_label.text = "DANGER 5"
+				return
 			mass_on_plate += thought.mass
 
 	if mass_on_plate >= required_mass:
@@ -69,6 +95,7 @@ func _latch() -> void:
 
 
 func _build_visual(label_text: String) -> void:
+	set_meta("base_label", label_text)
 	var visual := MeshInstance3D.new()
 	var box := BoxMesh.new()
 	if abs(gravity_direction.x) > 0.5:
@@ -93,6 +120,15 @@ func _build_visual(label_text: String) -> void:
 	plate_label.no_depth_test = true
 	plate_label.position = -gravity_direction * 0.29
 	add_child(plate_label)
+
+
+func _contains_thought(thought: ThoughtProp) -> bool:
+	var offset := thought.global_position - global_position
+	var distance := offset.dot(-gravity_direction)
+	var axes := _surface_axes()
+	return distance >= 0.0 and distance <= 1.25 \
+		and absf(offset.dot(axes[0])) <= plate_size.x * 0.52 \
+		and absf(offset.dot(axes[1])) <= plate_size.y * 0.52
 
 
 func _surface_axes() -> Array[Vector3]:

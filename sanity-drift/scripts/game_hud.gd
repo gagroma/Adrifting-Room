@@ -21,6 +21,9 @@ var anchors_label: Label
 var hint_label: Label
 var calm_label: Label
 var finish_stats: Label
+var finish_eyebrow: Label
+var finish_title: Label
+var finish_restart_button: Button
 var difficulty_button: Button
 var finish_menu_button: Button
 var guide_panel: PanelContainer
@@ -68,7 +71,29 @@ func show_finish(stats_text: String) -> void:
 	title_panel.visible = false
 	controls_panel.visible = false
 	finish_panel.visible = true
+	(finish_panel as ColorRect).color = Color(0.95, 0.93, 1.0, 0.96)
+	finish_eyebrow.text = "AWAKENING"
+	finish_eyebrow.add_theme_color_override("font_color", GameColors.DEPTH)
+	finish_title.text = "YOUR THOUGHTS ARE IN PLACE"
+	finish_title.add_theme_color_override("font_color", GameColors.NIGHT)
+	finish_restart_button.text = "DREAM AGAIN"
 	finish_stats.text = stats_text
+	finish_stats.add_theme_color_override("font_color", GameColors.DEPTH)
+
+
+func show_game_over(room_name: String) -> void:
+	_set_game_hud_visible(false)
+	title_panel.visible = false
+	controls_panel.visible = false
+	finish_panel.visible = true
+	(finish_panel as ColorRect).color = Color(0.12, 0.015, 0.025, 0.97)
+	finish_eyebrow.text = "FALSE MEMORY ACCEPTED"
+	finish_eyebrow.add_theme_color_override("font_color", GameColors.DANGER)
+	finish_title.text = "THE DREAM COLLAPSED"
+	finish_title.add_theme_color_override("font_color", Color.WHITE)
+	finish_stats.text = "%s was destroyed.\nPull a flashing false memory away before five seconds expire." % room_name
+	finish_stats.add_theme_color_override("font_color", Color("ffc8c8"))
+	finish_restart_button.text = "RETRY ROOM"
 
 
 func set_hard_mode(value: bool) -> void:
@@ -361,25 +386,25 @@ func _build_finish_panel() -> void:
 	content.position = Vector2(-320, -220)
 	content.size = Vector2(640, 440)
 	finish_panel.add_child(content)
-	var small := _label(16, GameColors.DEPTH)
-	small.text = "AWAKENING"
-	small.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	content.add_child(small)
-	var title := _label(56, GameColors.NIGHT)
-	title.text = "YOUR THOUGHTS ARE IN PLACE"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.custom_minimum_size.y = 136
-	content.add_child(title)
+	finish_eyebrow = _label(16, GameColors.DEPTH)
+	finish_eyebrow.text = "AWAKENING"
+	finish_eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	content.add_child(finish_eyebrow)
+	finish_title = _label(56, GameColors.NIGHT)
+	finish_title.text = "YOUR THOUGHTS ARE IN PLACE"
+	finish_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	finish_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	finish_title.custom_minimum_size.y = 136
+	content.add_child(finish_title)
 	finish_stats = _label(20, GameColors.DEPTH)
 	finish_stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(finish_stats)
-	var again := Button.new()
-	again.text = "DREAM AGAIN"
-	again.custom_minimum_size = Vector2(300, 52)
-	again.add_theme_font_size_override("font_size", 18)
-	again.pressed.connect(func() -> void: restart_pressed.emit())
-	content.add_child(again)
+	finish_restart_button = Button.new()
+	finish_restart_button.text = "DREAM AGAIN"
+	finish_restart_button.custom_minimum_size = Vector2(300, 52)
+	finish_restart_button.add_theme_font_size_override("font_size", 18)
+	finish_restart_button.pressed.connect(func() -> void: restart_pressed.emit())
+	content.add_child(finish_restart_button)
 	finish_menu_button = Button.new()
 	finish_menu_button.name = "FinishMenuButton"
 	finish_menu_button.text = "MAIN MENU"

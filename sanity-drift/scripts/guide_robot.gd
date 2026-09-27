@@ -126,6 +126,8 @@ func enter_tutorial(data: Dictionary, camera: Node3D) -> void:
 	enter_room(data, -1, camera)
 	dialogue_queue.clear()
 	queue_line("Welcome to training. I will wait while you try every action.", "wave", 4.5)
+	queue_line("A False Memory looks exactly like a real one. You cannot identify it in advance.", "no", 5.5)
+	queue_line("If a Memory flashes red on a plate, pull it away within five seconds before it explodes the room.", "wave", 6.0)
 	queue_line("First, aim at the floating Memory and grab it with right trigger or the left mouse button.", "yes", 6.0)
 
 

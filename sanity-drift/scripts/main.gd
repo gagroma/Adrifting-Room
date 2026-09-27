@@ -3,7 +3,7 @@ extends Node3D
 # Main only coordinates the game loop. Player input, rooms, thoughts, plates,
 # interface and audio live in their own scripts.
 
-enum GameState { TITLE, PLAYING, COMPLETE, TUTORIAL }
+enum GameState { TITLE, PLAYING, COMPLETE, TUTORIAL, FAILED }
 enum Phase { DRIFT, WARNING, FALLING, EVALUATE }
 
 var game_state := GameState.TITLE
@@ -27,6 +27,7 @@ var tutorial_push_thought: ThoughtProp
 var tutorial_push_origin := Vector3.ZERO
 var tutorial_push_start_distance := 0.0
 var tutorial_anchor_seen := false
+var failed_was_tutorial := false
 
 const TUTORIAL_OBJECTIVES := [
 	"Aim at the Memory and grab it.",
@@ -35,7 +36,7 @@ const TUTORIAL_OBJECTIVES := [
 	"Push the Memory away from you.",
 	"Aim at the Memory and anchor it.",
 	"End the Drift phase early and watch the gravity warning.",
-	"Place the Memory above the glowing plate, then end Drift again."
+	"Place a Memory above the plate. If it flashes red, pull it away before the countdown ends."
 ]
 
 var rooms: Array[Dictionary] = []
@@ -63,6 +64,7 @@ func _create_game_systems() -> void:
 	room_builder = RoomBuilder.new()
 	room_builder.name = "RoomBuilder"
 	room_builder.plate_activated.connect(_on_plate_activated)
+	room_builder.false_thought_accepted.connect(_on_false_thought_accepted)
 	add_child(room_builder)
 
 	player = PlayerController.new()
@@ -77,12 +79,12 @@ func _create_game_systems() -> void:
 	hud.name = "HUD"
 	hud.start_pressed.connect(_start_game)
 	hud.tutorial_pressed.connect(_start_tutorial)
-	hud.restart_pressed.connect(_start_game)
+	hud.restart_pressed.connect(_start_or_retry)
 	hud.menu_pressed.connect(_return_to_title)
 	hud.difficulty_changed.connect(_set_hard_mode)
 	hud.calm_changed.connect(_set_calm_mode)
 	add_child(hud)
-	player.menu_start_requested.connect(_start_game)
+	player.menu_start_requested.connect(_start_or_retry)
 	player.menu_tutorial_requested.connect(_start_tutorial)
 	player.menu_main_requested.connect(_return_to_title)
 	player.menu_difficulty_changed.connect(_set_hard_mode)
@@ -147,6 +149,21 @@ func _start_game() -> void:
 	player.set_playing(true)
 	hud.show_game()
 	_load_room(room_index)
+
+
+func _start_or_retry() -> void:
+	if game_state != GameState.FAILED:
+		_start_game()
+		return
+	player.hide_vr_menu()
+	player.set_playing(true)
+	hud.show_game()
+	if failed_was_tutorial:
+		game_state = GameState.TUTORIAL
+		_load_tutorial()
+	else:
+		game_state = GameState.PLAYING
+		_load_room(room_index)
 
 
 func _start_tutorial() -> void:
@@ -295,9 +312,10 @@ func _process(delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if not _is_gameplay_active() or phase != Phase.FALLING or room_transitioning:
+	if not _is_gameplay_active() or room_transitioning:
 		return
-	room_builder.apply_gravity(current_gravity, player.grabbed_thought)
+	if phase == Phase.FALLING:
+		room_builder.apply_gravity(current_gravity, player.grabbed_thought)
 	room_builder.update_plates(delta, current_gravity)
 
 
@@ -388,6 +406,31 @@ func _finish_game() -> void:
 	hud.show_finish("%02d:%02d · gravity shifts: %d · %s\nAll three dream layers complete" % [minutes, seconds, cycles_used, difficulty_name])
 	player.set_wrist_text("AWAKENING\nEvery thought is in place")
 	audio.play_chord()
+
+
+func _on_false_thought_accepted(thought: ThoughtProp, _plate: PressurePad) -> void:
+	if not _is_gameplay_active() or room_transitioning:
+		return
+	failed_was_tutorial = game_state == GameState.TUTORIAL
+	room_transitioning = true
+	current_gravity = Vector3.ZERO
+	player.release_grab()
+	player.set_vr_objective_visible(false)
+	guide.say_now("False Memory accepted! The dream is collapsing!", "no", 3.0)
+	player.set_wrist_text("FALSE MEMORY\nDETONATION")
+	audio.play_tone(54.0, 1.35, -2.0, true)
+	audio.play_tone(31.0, 1.7, -4.0, true)
+	room_builder.explode_room(thought.global_position, 1.35)
+	hud.set_vignette_strength(0.95)
+	game_state = GameState.FAILED
+	await get_tree().create_timer(1.4).timeout
+	if game_state != GameState.FAILED:
+		return
+	guide.leave_room()
+	player.set_playing(false)
+	player.show_vr_game_over()
+	hud.show_game_over(str(current_room_data.get("name", "THE ROOM")))
+	player.set_wrist_text("DREAM COLLAPSED\nFalse memory accepted")
 
 
 func _on_plate_activated(index: int) -> void:
@@ -518,8 +561,8 @@ func _set_tutorial_step(step: int) -> void:
 	_update_status()
 
 
-func _on_thought_grabbed(_thought: ThoughtProp) -> void:
-	if game_state == GameState.TUTORIAL and tutorial_step == 0:
+func _on_thought_grabbed(thought: ThoughtProp) -> void:
+	if game_state == GameState.TUTORIAL and tutorial_step == 0 and not thought.is_false_memory():
 		_set_tutorial_step(1)
 		guide.say_now("Great! The thought follows your hand or gaze. Change its distance with the right stick or mouse wheel.", "thumbsup", 6.0)
 
