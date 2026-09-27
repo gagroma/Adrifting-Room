@@ -3,7 +3,7 @@ extends Node3D
 # Main only coordinates the game loop. Player input, rooms, thoughts, plates,
 # interface and audio live in their own scripts.
 
-enum GameState { TITLE, PLAYING, COMPLETE, TUTORIAL }
+enum GameState { TITLE, PLAYING, COMPLETE, TUTORIAL, FAILED }
 enum Phase { DRIFT, WARNING, FALLING, EVALUATE }
 
 var game_state := GameState.TITLE
@@ -19,14 +19,16 @@ var calm_mode := false
 var anchors_left := 0
 var room_transitioning := false
 var audio_enabled := true
-var hard_mode := false
+var pause_active := false
 var tutorial_room: Dictionary = {}
 var current_room_data: Dictionary = {}
+var active_anchor: ThoughtProp
 var tutorial_step := 0
 var tutorial_push_thought: ThoughtProp
 var tutorial_push_origin := Vector3.ZERO
 var tutorial_push_start_distance := 0.0
 var tutorial_anchor_seen := false
+var failed_was_tutorial := false
 
 const TUTORIAL_OBJECTIVES := [
 	"Aim at the Memory and grab it.",
@@ -35,7 +37,7 @@ const TUTORIAL_OBJECTIVES := [
 	"Push the Memory away from you.",
 	"Aim at the Memory and anchor it.",
 	"End the Drift phase early and watch the gravity warning.",
-	"Place the Memory above the glowing plate, then end Drift again."
+	"Place a Memory above the plate. If it flashes red, pull it away before the countdown ends."
 ]
 
 var rooms: Array[Dictionary] = []
@@ -46,10 +48,13 @@ var hud: GameHud
 var audio: GameAudio
 var guide: GuideRobot
 
+const NORMAL_ROOM_COUNT := 3
+
 
 func _ready() -> void:
 	rooms = RoomCatalog.all_rooms()
 	hard_rooms = RoomCatalog.hard_rooms()
+	rooms.append_array(hard_rooms)
 	tutorial_room = RoomCatalog.tutorial_room()
 	_build_world_environment()
 	_create_game_systems()
@@ -63,6 +68,7 @@ func _create_game_systems() -> void:
 	room_builder = RoomBuilder.new()
 	room_builder.name = "RoomBuilder"
 	room_builder.plate_activated.connect(_on_plate_activated)
+	room_builder.false_thought_accepted.connect(_on_false_thought_accepted)
 	add_child(room_builder)
 
 	player = PlayerController.new()
@@ -71,21 +77,26 @@ func _create_game_systems() -> void:
 	player.skip_requested.connect(_on_skip_requested)
 	player.restart_requested.connect(_restart_room)
 	player.calm_requested.connect(func() -> void: _set_calm_mode(not calm_mode))
+	player.pause_requested.connect(_toggle_pause)
+	player.pause_resume_requested.connect(_resume_game)
+	player.pause_restart_requested.connect(_restart_from_pause)
+	player.quit_requested.connect(_quit_game)
 	add_child(player)
 
 	hud = GameHud.new()
 	hud.name = "HUD"
 	hud.start_pressed.connect(_start_game)
 	hud.tutorial_pressed.connect(_start_tutorial)
-	hud.restart_pressed.connect(_start_game)
+	hud.restart_pressed.connect(_start_or_retry)
 	hud.menu_pressed.connect(_return_to_title)
-	hud.difficulty_changed.connect(_set_hard_mode)
 	hud.calm_changed.connect(_set_calm_mode)
+	hud.pause_resume_pressed.connect(_resume_game)
+	hud.pause_restart_pressed.connect(_restart_from_pause)
+	hud.quit_pressed.connect(_quit_game)
 	add_child(hud)
-	player.menu_start_requested.connect(_start_game)
+	player.menu_start_requested.connect(_start_or_retry)
 	player.menu_tutorial_requested.connect(_start_tutorial)
 	player.menu_main_requested.connect(_return_to_title)
-	player.menu_difficulty_changed.connect(_set_hard_mode)
 	player.menu_controls_requested.connect(hud.toggle_vr_controls)
 	player.guide_hit.connect(func(source_position: Vector3) -> void: guide.take_hit(source_position))
 	player.thought_grabbed.connect(_on_thought_grabbed)
@@ -131,6 +142,9 @@ func _build_world_environment() -> void:
 
 
 func _show_title() -> void:
+	if get_tree().paused:
+		get_tree().paused = false
+	pause_active = false
 	game_state = GameState.TITLE
 	guide.leave_room()
 	player.set_playing(false)
@@ -139,6 +153,9 @@ func _show_title() -> void:
 
 
 func _start_game() -> void:
+	if get_tree().paused:
+		get_tree().paused = false
+	pause_active = false
 	player.hide_vr_menu()
 	room_index = 0
 	cycles_used = 0
@@ -147,6 +164,21 @@ func _start_game() -> void:
 	player.set_playing(true)
 	hud.show_game()
 	_load_room(room_index)
+
+
+func _start_or_retry() -> void:
+	if game_state != GameState.FAILED:
+		_start_game()
+		return
+	player.hide_vr_menu()
+	player.set_playing(true)
+	hud.show_game()
+	if failed_was_tutorial:
+		game_state = GameState.TUTORIAL
+		_load_tutorial()
+	else:
+		game_state = GameState.PLAYING
+		_load_room(room_index)
 
 
 func _start_tutorial() -> void:
@@ -160,6 +192,9 @@ func _start_tutorial() -> void:
 
 
 func _return_to_title() -> void:
+	if get_tree().paused:
+		get_tree().paused = false
+	pause_active = false
 	room_transitioning = false
 	current_gravity = Vector3.ZERO
 	player.release_grab()
@@ -177,6 +212,7 @@ func _restart_room() -> void:
 func _load_tutorial() -> void:
 	room_transitioning = false
 	player.release_grab()
+	active_anchor = null
 	player.set_vr_objective_visible(true)
 	hud.show_game()
 	sequence_step = 0
@@ -202,11 +238,12 @@ func _load_room(index: int, keep_transition := false) -> void:
 	room_index = index
 	room_transitioning = keep_transition
 	player.release_grab()
+	active_anchor = null
 	player.set_vr_objective_visible(true)
 	hud.show_game()
 	sequence_step = 0
-	var source_room := hard_rooms[index] if hard_mode else rooms[index]
-	var room := _configured_room(source_room)
+	var source_room := rooms[index]
+	var room := _configured_room(source_room, index)
 	current_room_data = room
 	anchors_left = int(room["anchors"])
 	room_builder.build_room(room)
@@ -217,6 +254,7 @@ func _load_room(index: int, keep_transition := false) -> void:
 
 
 func _begin_drift() -> void:
+	room_builder.reset_shift_effects()
 	phase = Phase.DRIFT
 	phase_time_left = float(_active_room()["drift"])
 	current_gravity = Vector3.ZERO
@@ -233,6 +271,7 @@ func _begin_warning() -> void:
 	warned_second = int(ceil(phase_time_left)) + 1
 	audio.play_tone(82.0, 1.3, -16.0)
 	room_builder.highlight_next_plates(_next_direction())
+	room_builder.begin_shift_warning(_next_direction(), phase_time_left)
 	guide.on_warning(GameColors.direction_name(_next_direction()))
 
 
@@ -241,7 +280,8 @@ func _begin_fall() -> void:
 	phase_time_left = 3.6
 	current_gravity = _next_direction()
 	cycles_used += 1
-	audio.play_tone(120.0, 0.65, -9.0, true)
+	audio.play_gravity_impact(calm_mode)
+	room_builder.play_shift_impact(current_gravity)
 	room_builder.highlight_next_plates(current_gravity)
 
 
@@ -250,7 +290,8 @@ func _finish_fall() -> void:
 	phase_time_left = 1.15
 	current_gravity = Vector3.ZERO
 	sequence_step += 1
-	room_builder.release_all_anchors()
+	if not _uses_reusable_anchor():
+		room_builder.release_all_anchors()
 	_update_status()
 
 
@@ -271,6 +312,7 @@ func _process(delta: float) -> void:
 			if phase_time_left <= 0.0:
 				_begin_warning()
 		Phase.WARNING:
+			room_builder.update_shift_warning(phase_time_left)
 			var second := int(ceil(phase_time_left))
 			if second != warned_second and second > 0:
 				warned_second = second
@@ -295,13 +337,17 @@ func _process(delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if not _is_gameplay_active() or phase != Phase.FALLING or room_transitioning:
+	if not _is_gameplay_active() or room_transitioning:
 		return
-	room_builder.apply_gravity(current_gravity, player.grabbed_thought)
+	if phase == Phase.FALLING:
+		room_builder.apply_gravity(current_gravity, player.grabbed_thought)
 	room_builder.update_plates(delta, current_gravity)
+	if bool(_active_room().get("simultaneous_plates", false)) and room_builder.all_plates_active():
+		_complete_room()
 
 
 func _complete_room() -> void:
+	room_builder.reset_shift_effects()
 	if game_state == GameState.TUTORIAL:
 		_complete_tutorial()
 		return
@@ -311,6 +357,11 @@ func _complete_room() -> void:
 	player.set_vr_objective_visible(false)
 	audio.play_chord()
 	guide.celebrate()
+	var plate_link_delay := room_builder.play_plate_link_completion()
+	if plate_link_delay > 0.0:
+		await get_tree().create_timer(plate_link_delay).timeout
+		if not _is_gameplay_active():
+			return
 	room_builder.open_door()
 	player.set_wrist_text("CHORD COMPLETE\nDream layer dissolving")
 	await get_tree().create_timer(0.72).timeout
@@ -340,6 +391,7 @@ func _complete_room() -> void:
 
 
 func _complete_tutorial() -> void:
+	room_builder.reset_shift_effects()
 	room_transitioning = true
 	current_gravity = Vector3.ZERO
 	player.release_grab()
@@ -384,10 +436,34 @@ func _finish_game() -> void:
 	var elapsed := int((Time.get_ticks_msec() - run_started_msec) / 1000.0)
 	var minutes := elapsed / 60
 	var seconds := elapsed % 60
-	var difficulty_name := "HARD" if hard_mode else "NORMAL"
-	hud.show_finish("%02d:%02d · gravity shifts: %d · %s\nAll three dream layers complete" % [minutes, seconds, cycles_used, difficulty_name])
+	hud.show_finish("%02d:%02d · gravity shifts: %d\nAll six dream layers complete · NORMAL → HARD" % [minutes, seconds, cycles_used])
 	player.set_wrist_text("AWAKENING\nEvery thought is in place")
 	audio.play_chord()
+
+
+func _on_false_thought_accepted(thought: ThoughtProp, _plate: PressurePad) -> void:
+	if not _is_gameplay_active() or room_transitioning:
+		return
+	failed_was_tutorial = game_state == GameState.TUTORIAL
+	room_transitioning = true
+	current_gravity = Vector3.ZERO
+	player.release_grab()
+	player.set_vr_objective_visible(false)
+	guide.say_now("False Memory accepted! The dream is collapsing!", "no", 3.0)
+	player.set_wrist_text("FALSE MEMORY\nDETONATION")
+	audio.play_tone(54.0, 1.35, -2.0, true)
+	audio.play_tone(31.0, 1.7, -4.0, true)
+	room_builder.explode_room(thought.global_position, 1.35)
+	hud.set_vignette_strength(0.95)
+	game_state = GameState.FAILED
+	await get_tree().create_timer(1.4).timeout
+	if game_state != GameState.FAILED:
+		return
+	guide.leave_room()
+	player.set_playing(false)
+	player.show_vr_game_over()
+	hud.show_game_over(str(current_room_data.get("name", "THE ROOM")))
+	player.set_wrist_text("DREAM COLLAPSED\nFalse memory accepted")
 
 
 func _on_plate_activated(index: int) -> void:
@@ -397,14 +473,23 @@ func _on_plate_activated(index: int) -> void:
 
 
 func _on_anchor_requested(thought: ThoughtProp) -> void:
-	if anchors_left <= 0:
+	if not is_instance_valid(thought):
+		return
+	if _uses_reusable_anchor() and thought == active_anchor and thought.anchored:
+		_recover_active_anchor(thought)
+		return
+	if anchors_left <= 0 or thought.anchored:
 		audio.play_tone(95.0, 0.10, -18.0)
 		return
-	if not is_instance_valid(thought) or thought.anchored:
+	if _uses_reusable_anchor() and not room_builder.can_anchor_on_active_plate(thought, current_gravity):
+		audio.play_tone(95.0, 0.10, -18.0)
+		guide.say_now("A live plate must light before its Memory can be anchored.", "no", 4.0)
 		return
 	if thought == player.grabbed_thought:
 		player.release_grab()
 	thought.set_anchor(true)
+	if _uses_reusable_anchor():
+		active_anchor = thought
 	if game_state == GameState.TUTORIAL:
 		tutorial_anchor_seen = true
 	anchors_left -= 1
@@ -428,10 +513,48 @@ func _set_calm_mode(value: bool) -> void:
 	_update_status()
 
 
-func _set_hard_mode(value: bool) -> void:
-	hard_mode = value
-	hud.set_hard_mode(value)
-	player.set_menu_hard_mode(value)
+func _toggle_pause() -> void:
+	if pause_active:
+		_resume_game()
+	elif _is_gameplay_active() and not room_transitioning:
+		_set_pause(true)
+
+
+func _set_pause(value: bool) -> void:
+	if value == pause_active:
+		return
+	if value:
+		pause_active = true
+		player.release_grab()
+		player.set_playing(false)
+		player.show_vr_pause_menu()
+		hud.show_pause()
+		get_tree().paused = true
+	else:
+		get_tree().paused = false
+		pause_active = false
+		player.hide_vr_pause_menu()
+		player.set_playing(true)
+		player.set_vr_objective_visible(true)
+		hud.show_game()
+		_update_status()
+
+
+func _resume_game() -> void:
+	if pause_active:
+		_set_pause(false)
+
+
+func _restart_from_pause() -> void:
+	if pause_active:
+		_set_pause(false)
+	_restart_room()
+
+
+func _quit_game() -> void:
+	if get_tree().paused:
+		get_tree().paused = false
+	get_tree().quit()
 
 
 func _next_direction() -> Vector3:
@@ -494,16 +617,15 @@ func _active_room() -> Dictionary:
 	return current_room_data
 
 
-func _configured_room(source: Dictionary) -> Dictionary:
+func _configured_room(source: Dictionary, index: int) -> Dictionary:
 	var result := source.duplicate(true)
-	if hard_mode:
+	if index >= NORMAL_ROOM_COUNT:
 		result["drift"] = maxf(8.0, float(result["drift"]) * 0.65)
-		result["subtitle"] = "%s · HARD" % str(result["subtitle"])
 	return result
 
 
 func _warning_duration() -> float:
-	if game_state == GameState.PLAYING and hard_mode:
+	if game_state == GameState.PLAYING and room_index >= NORMAL_ROOM_COUNT:
 		return 3.0
 	return 5.0
 
@@ -518,10 +640,25 @@ func _set_tutorial_step(step: int) -> void:
 	_update_status()
 
 
-func _on_thought_grabbed(_thought: ThoughtProp) -> void:
-	if game_state == GameState.TUTORIAL and tutorial_step == 0:
+func _on_thought_grabbed(thought: ThoughtProp) -> void:
+	if _uses_reusable_anchor() and thought == active_anchor:
+		_recover_active_anchor(thought)
+	if game_state == GameState.TUTORIAL and tutorial_step == 0 and not thought.is_false_memory():
 		_set_tutorial_step(1)
 		guide.say_now("Great! The thought follows your hand or gaze. Change its distance with the right stick or mouse wheel.", "thumbsup", 6.0)
+
+
+func _recover_active_anchor(thought: ThoughtProp) -> void:
+	if is_instance_valid(thought) and thought.anchored:
+		thought.set_anchor(false)
+	active_anchor = null
+	anchors_left = int(_active_room().get("anchors", 0))
+	audio.play_tone(510.0, 0.2, -12.0)
+	_update_status()
+
+
+func _uses_reusable_anchor() -> bool:
+	return bool(_active_room().get("reusable_anchor", false))
 
 
 func _on_grab_distance_changed(_distance: float) -> void:

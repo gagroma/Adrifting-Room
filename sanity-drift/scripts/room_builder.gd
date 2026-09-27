@@ -2,8 +2,11 @@ class_name RoomBuilder
 extends Node3D
 
 signal plate_activated(index: int)
+signal false_thought_accepted(thought: ThoughtProp, plate: PressurePad)
 
 const ROOM_HALF := Vector3(6.0, 5.0, 6.0)
+const GravityShiftFX := preload("res://scripts/gravity_shift_fx.gd")
+const LibraryPlateLink := preload("res://scripts/library_plate_link.gd")
 
 var thoughts: Array[ThoughtProp] = []
 var plates: Array[PressurePad] = []
@@ -11,6 +14,10 @@ var door_mesh: MeshInstance3D
 var door_light: OmniLight3D
 var drift_visual: Node3D
 var calm_mode := false
+var shift_fx: Node3D
+var room_lamp: OmniLight3D
+var shift_furniture: Array[Node3D] = []
+var plate_link: Node3D
 
 
 func _ready() -> void:
@@ -18,7 +25,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if is_instance_valid(drift_visual) and not calm_mode:
+	if is_instance_valid(drift_visual) and not calm_mode and (not is_instance_valid(shift_fx) or not shift_fx.is_processing()):
 		drift_visual.rotate_y(delta * 0.025)
 		drift_visual.rotate_z(delta * 0.009)
 
@@ -34,9 +41,23 @@ func build_room(room_data: Dictionary) -> void:
 		_spawn_thought(thought_data["kind"], thought_data["position"])
 	for plate_data in room_data["pads"]:
 		_spawn_plate(plate_data)
+	if bool(room_data.get("simultaneous_plates", false)) and plates.size() >= 2:
+		plate_link = LibraryPlateLink.new()
+		plate_link.name = "LibraryPlateLink"
+		add_child(plate_link)
+		plate_link.configure(plates[0], plates[1])
+	shift_fx = GravityShiftFX.new()
+	shift_fx.name = "GravityShiftFX"
+	add_child(shift_fx)
+	shift_fx.configure(ROOM_HALF, room_lamp, drift_visual, shift_furniture)
+	set_calm_mode(calm_mode)
 
 
 func clear_room() -> void:
+	reset_shift_effects()
+	shift_fx = null
+	plate_link = null
+	shift_furniture.clear()
 	for child in get_children():
 		child.free()
 	thoughts.clear()
@@ -44,6 +65,34 @@ func clear_room() -> void:
 	door_mesh = null
 	door_light = null
 	drift_visual = null
+	room_lamp = null
+
+
+func begin_shift_warning(direction: Vector3, duration: float) -> void:
+	if is_instance_valid(shift_fx):
+		shift_fx.begin_warning(direction, duration)
+
+
+func update_shift_warning(seconds_left: float) -> void:
+	if is_instance_valid(shift_fx):
+		shift_fx.update_warning(seconds_left)
+
+
+func play_shift_impact(direction: Vector3) -> void:
+	if is_instance_valid(shift_fx):
+		shift_fx.trigger_impact(direction)
+
+
+func reset_shift_effects() -> void:
+	if is_instance_valid(shift_fx):
+		shift_fx.reset()
+
+
+func play_plate_link_completion() -> float:
+	if not is_instance_valid(plate_link):
+		return 0.0
+	plate_link.play_completion_pulse()
+	return LibraryPlateLink.COMPLETION_DURATION
 
 
 func apply_gravity(direction: Vector3, grabbed_thought: ThoughtProp) -> void:
@@ -66,6 +115,13 @@ func highlight_next_plates(direction: Vector3) -> void:
 func release_all_anchors() -> void:
 	for thought in thoughts:
 		thought.release_anchor()
+
+
+func can_anchor_on_active_plate(thought: ThoughtProp, current_gravity: Vector3) -> bool:
+	for plate in plates:
+		if plate.can_anchor_thought(thought, current_gravity):
+			return true
+	return false
 
 
 func all_plates_active() -> bool:
@@ -92,6 +148,7 @@ func open_door() -> Tween:
 
 
 func disintegrate_room(duration := 1.25) -> Tween:
+	reset_shift_effects()
 	# Break the current dream layer into simple fragments and push every room
 	# element away from the player. The next room is built after this tween.
 	var rng := RandomNumberGenerator.new()
@@ -110,6 +167,12 @@ func disintegrate_room(duration := 1.25) -> Tween:
 		var piece := child as Node3D
 		if piece.is_in_group("transition_fragments"):
 			continue
+		if piece is CollisionObject3D:
+			(piece as CollisionObject3D).collision_layer = 0
+			(piece as CollisionObject3D).collision_mask = 0
+			for piece_child in piece.get_children():
+				if piece_child is CollisionShape3D:
+					(piece_child as CollisionShape3D).set_deferred("disabled", true)
 		var outward := piece.position.normalized()
 		if outward.length_squared() < 0.05:
 			outward = Vector3(rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0)).normalized()
@@ -120,6 +183,37 @@ func disintegrate_room(duration := 1.25) -> Tween:
 		tween.tween_property(piece, "rotation", target_rotation, duration)
 		tween.tween_property(piece, "scale", Vector3.ONE * 0.04, duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	return tween
+
+
+func explode_room(origin: Vector3, duration := 1.35) -> Tween:
+	var blast := MeshInstance3D.new()
+	blast.name = "FalseMemoryBlast"
+	blast.add_to_group("transition_fragments")
+	var blast_mesh := SphereMesh.new()
+	blast_mesh.radius = 0.34
+	blast_mesh.height = 0.68
+	blast.mesh = blast_mesh
+	blast.position = to_local(origin)
+	var blast_material := GameColors.material(Color(1.0, 0.08, 0.04, 0.88), 12.0, true)
+	blast.material_override = blast_material
+	add_child(blast)
+
+	var flash := OmniLight3D.new()
+	flash.name = "ExplosionLight"
+	flash.add_to_group("transition_fragments")
+	flash.position = to_local(origin)
+	flash.light_color = Color("ff351f")
+	flash.light_energy = 18.0
+	flash.omni_range = 14.0
+	add_child(flash)
+
+	var blast_tween := create_tween()
+	blast_tween.set_parallel(true)
+	blast_tween.tween_property(blast, "scale", Vector3.ONE * 34.0, duration).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	blast_tween.tween_property(blast_material, "albedo_color:a", 0.0, duration)
+	blast_tween.tween_property(flash, "light_energy", 0.0, duration * 0.72)
+	disintegrate_room(duration)
+	return blast_tween
 
 
 func show_awakening_message() -> void:
@@ -137,6 +231,8 @@ func show_awakening_message() -> void:
 
 func set_calm_mode(value: bool) -> void:
 	calm_mode = value
+	if is_instance_valid(shift_fx):
+		shift_fx.set_calm_mode(value)
 	if is_instance_valid(drift_visual):
 		drift_visual.visible = not value
 
@@ -156,12 +252,17 @@ func _spawn_plate(data: Dictionary) -> void:
 	plate.configure(data, ROOM_HALF)
 	var plate_index := plates.size()
 	plate.activated.connect(_on_plate_activated.bind(plate_index))
+	plate.false_thought_accepted.connect(_on_false_thought_accepted)
 	add_child(plate)
 	plates.append(plate)
 
 
 func _on_plate_activated(_plate: PressurePad, index: int) -> void:
 	plate_activated.emit(index)
+
+
+func _on_false_thought_accepted(thought: ThoughtProp, plate: PressurePad) -> void:
+	false_thought_accepted.emit(thought, plate)
 
 
 func _build_shell(accent: Color) -> void:
@@ -192,6 +293,7 @@ func _build_shell(accent: Color) -> void:
 	lamp.omni_range = 10.0
 	lamp.shadow_enabled = true
 	add_child(lamp)
+	room_lamp = lamp
 
 
 func _build_theme_geometry(theme: String, accent: Color) -> void:
@@ -206,9 +308,9 @@ func _build_theme_geometry(theme: String, accent: Color) -> void:
 
 func _build_bedroom(accent: Color) -> void:
 	# A low bed, bedside table and moonlit window create a soft horizontal room.
-	_add_decor_box(Vector3(-3.7, -4.48, 0.6), Vector3(3.2, 0.42, 4.4), GameColors.DEPTH.lightened(0.12))
-	_add_decor_box(Vector3(-3.7, -4.18, 0.6), Vector3(2.9, 0.34, 4.0), GameColors.MIST.darkened(0.08), 0.16)
-	_add_decor_box(Vector3(-3.7, -2.85, -1.35), Vector3(3.25, 2.4, 0.24), GameColors.DEPTH.lightened(0.20))
+	_add_decor_box(Vector3(-3.7, -4.48, -3.35), Vector3(3.2, 0.42, 4.4), GameColors.DEPTH.lightened(0.12))
+	_add_decor_box(Vector3(-3.7, -4.18, -3.35), Vector3(2.9, 0.34, 4.0), GameColors.MIST.darkened(0.08), 0.16)
+	_add_decor_box(Vector3(-3.7, -2.85, -5.48), Vector3(3.25, 2.4, 0.24), GameColors.DEPTH.lightened(0.20))
 	_add_decor_box(Vector3(3.7, -4.25, 1.5), Vector3(1.25, 1.3, 1.25), GameColors.DEPTH.lightened(0.18))
 	_add_decor_cylinder(Vector3(3.7, -3.2, 1.5), 0.12, 1.0, accent, 1.4)
 	_add_decor_sphere(Vector3(3.7, -2.55, 1.5), 0.48, Color("ffdba0"), 2.8)
@@ -260,36 +362,72 @@ func _build_library(accent: Color) -> void:
 
 
 func _add_decor_box(box_position: Vector3, size: Vector3, color: Color, emission := 0.0, transparent := false) -> void:
+	var body := StaticBody3D.new()
+	body.position = box_position
+	body.collision_layer = 1
+	body.collision_mask = 2
 	var visual := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
 	mesh.size = size
 	visual.mesh = mesh
-	visual.position = box_position
 	visual.material_override = GameColors.material(color, emission, transparent)
-	add_child(visual)
+	body.add_child(visual)
+	# The shell already owns the floor collision. Every raised decoration gets
+	# its own collider so drifting thoughts cannot pass through furniture.
+	if box_position.y > -4.8:
+		var collision := CollisionShape3D.new()
+		var shape := BoxShape3D.new()
+		shape.size = size
+		collision.shape = shape
+		body.add_child(collision)
+	add_child(body)
+	# Floor tiles stay still; only theme furniture participates in the tremble.
+	if box_position.y > -4.8:
+		shift_furniture.append(body)
 
 
 func _add_decor_sphere(sphere_position: Vector3, radius: float, color: Color, emission := 0.0) -> void:
+	var body := StaticBody3D.new()
+	body.position = sphere_position
+	body.collision_layer = 1
+	body.collision_mask = 2
 	var visual := MeshInstance3D.new()
 	var mesh := SphereMesh.new()
 	mesh.radius = radius
 	mesh.height = radius * 2.0
 	visual.mesh = mesh
-	visual.position = sphere_position
 	visual.material_override = GameColors.material(color, emission)
-	add_child(visual)
+	body.add_child(visual)
+	var collision := CollisionShape3D.new()
+	var shape := SphereShape3D.new()
+	shape.radius = radius
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+	shift_furniture.append(body)
 
 
 func _add_decor_cylinder(cylinder_position: Vector3, radius: float, height: float, color: Color, emission := 0.0) -> void:
+	var body := StaticBody3D.new()
+	body.position = cylinder_position
+	body.collision_layer = 1
+	body.collision_mask = 2
 	var visual := MeshInstance3D.new()
 	var mesh := CylinderMesh.new()
 	mesh.top_radius = radius
 	mesh.bottom_radius = radius
 	mesh.height = height
 	visual.mesh = mesh
-	visual.position = cylinder_position
 	visual.material_override = GameColors.material(color, emission)
-	add_child(visual)
+	body.add_child(visual)
+	var collision := CollisionShape3D.new()
+	var shape := CylinderShape3D.new()
+	shape.radius = radius
+	shape.height = height
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+	shift_furniture.append(body)
 
 
 func _add_wall(wall_position: Vector3, size: Vector3, color: Color) -> void:

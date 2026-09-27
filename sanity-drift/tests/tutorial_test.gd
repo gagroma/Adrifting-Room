@@ -37,7 +37,9 @@ func _run() -> void:
 
 	_check(int(game.get("game_state")) == 3, "tutorial starts as its own game mode")
 	_check(not player.vr_menu.visible, "VR menu hides during training")
-	_check(builder.thoughts.size() == 1 and builder.plates.size() == 1, "training room has one thought and one target")
+	_check(builder.thoughts.size() == 2 and builder.plates.size() == 1, "training room has a true memory, a false memory, and one target")
+	_check(builder.thoughts.any(func(item: ThoughtProp) -> bool: return item.is_false_memory()), "training introduces the false-memory bomb")
+	_check(guide.dialogue_queue.any(func(line: Dictionary) -> bool: return "five seconds" in str(line["text"]).to_lower()), "robot tutorial explains the five-second false-memory warning")
 	_check(guide.visible and guide.room_number == -1, "the existing guide robot enters the training room")
 	_check("grab" in player.vr_objective.objective_label.text.to_lower(), "the first live objective teaches grab")
 	var guide_key := InputEventKey.new()
