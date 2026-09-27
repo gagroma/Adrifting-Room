@@ -340,6 +340,11 @@ func _complete_room() -> void:
 	player.set_vr_objective_visible(false)
 	audio.play_chord()
 	guide.celebrate()
+	var plate_link_delay := room_builder.play_plate_link_completion()
+	if plate_link_delay > 0.0:
+		await get_tree().create_timer(plate_link_delay).timeout
+		if not _is_gameplay_active():
+			return
 	room_builder.open_door()
 	player.set_wrist_text("CHORD COMPLETE\nDream layer dissolving")
 	await get_tree().create_timer(0.72).timeout

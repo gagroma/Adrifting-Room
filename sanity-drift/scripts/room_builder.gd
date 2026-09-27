@@ -6,6 +6,7 @@ signal false_thought_accepted(thought: ThoughtProp, plate: PressurePad)
 
 const ROOM_HALF := Vector3(6.0, 5.0, 6.0)
 const GravityShiftFX := preload("res://scripts/gravity_shift_fx.gd")
+const LibraryPlateLink := preload("res://scripts/library_plate_link.gd")
 
 var thoughts: Array[ThoughtProp] = []
 var plates: Array[PressurePad] = []
@@ -16,6 +17,7 @@ var calm_mode := false
 var shift_fx: Node3D
 var room_lamp: OmniLight3D
 var shift_furniture: Array[Node3D] = []
+var plate_link: Node3D
 
 
 func _ready() -> void:
@@ -39,6 +41,11 @@ func build_room(room_data: Dictionary) -> void:
 		_spawn_thought(thought_data["kind"], thought_data["position"])
 	for plate_data in room_data["pads"]:
 		_spawn_plate(plate_data)
+	if bool(room_data.get("simultaneous_plates", false)) and plates.size() == 2:
+		plate_link = LibraryPlateLink.new()
+		plate_link.name = "LibraryPlateLink"
+		add_child(plate_link)
+		plate_link.configure(plates[0], plates[1])
 	shift_fx = GravityShiftFX.new()
 	shift_fx.name = "GravityShiftFX"
 	add_child(shift_fx)
@@ -49,6 +56,7 @@ func build_room(room_data: Dictionary) -> void:
 func clear_room() -> void:
 	reset_shift_effects()
 	shift_fx = null
+	plate_link = null
 	shift_furniture.clear()
 	for child in get_children():
 		child.free()
@@ -78,6 +86,13 @@ func play_shift_impact(direction: Vector3) -> void:
 func reset_shift_effects() -> void:
 	if is_instance_valid(shift_fx):
 		shift_fx.reset()
+
+
+func play_plate_link_completion() -> float:
+	if not is_instance_valid(plate_link):
+		return 0.0
+	plate_link.play_completion_pulse()
+	return LibraryPlateLink.COMPLETION_DURATION
 
 
 func apply_gravity(direction: Vector3, grabbed_thought: ThoughtProp) -> void:
